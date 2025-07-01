@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Popup System - Standalone Test</title>
+    <link rel="stylesheet" href="popup.css" />
+    <style>
+      /* Test page specific styles */
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      /* Example template styles (normally in user's CSS, not toolkit) */
+      .game-over-popup {
+        text-align: center;
+        padding: 20px;
+      }
+
+      .game-over-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+      }
+
+      .game-over-message h2 {
+        color: #e74c3c;
+        margin: 0 0 15px 0;
+        font-size: 24px;
+      }
+
+      .game-over-message p {
+        margin: 10px 0;
+        font-size: 16px;
+      }
+
+      .level-complete-popup {
+        text-align: center;
+        padding: 20px;
+      }
+
+      .level-complete-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        animation: bounce 1s ease-in-out;
+      }
+
+      .level-complete-message h2 {
+        color: #00b894;
+        margin: 0 0 15px 0;
+        font-size: 24px;
+      }
+
+      .level-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .stat {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-label {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 5px;
+      }
+
+      .stat-value {
+        display: block;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .stat.bonus .stat-value {
+        color: #00b894;
+      }
+
+      @keyframes bounce {
+        0%,
+        20%,
+        53%,
+        80%,
+        100% {
+          transform: translateY(0);
+        }
+        40%,
+        43% {
+          transform: translateY(-20px);
+        }
+        70% {
+          transform: translateY(-10px);
+        }
+        90% {
+          transform: translateY(-4px);
+        }
+      }
+
+      .test-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 20px;
+      }
+
+      .control-panel {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        height: fit-content;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .main-area {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .control-section {
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .control-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .control-section h3 {
+        margin: 0 0 15px 0;
+        color: #48dbfb;
+        font-size: 16px;
+      }
+
+      .control-btn {
+        background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 3px;
+        font-size: 12px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        font-family: inherit;
+        width: calc(50% - 6px);
+        display: inline-block;
+      }
+
+      .control-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(72, 219, 251, 0.3);
+      }
+
+      .control-btn.danger {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      }
+
+      .control-btn.success {
+        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+      }
+
+      .control-btn.warning {
+        background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+      }
+
+      .control-btn.full-width {
+        width: calc(100% - 6px);
+      }
+
+      .input-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0;
+        font-size: 12px;
+      }
+
+      .input-group label {
+        min-width: 60px;
+        font-weight: bold;
+      }
+
+      .input-group input,
+      .input-group select,
+      .input-group textarea {
+        flex: 1;
+        padding: 4px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 12px;
+        font-family: inherit;
+      }
+
+      .input-group input::placeholder,
+      .input-group textarea::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .debug-log {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+        padding: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        margin-top: 15px;
+      }
+
+      .log-entry {
+        margin: 2px 0;
+        opacity: 0.9;
+      }
+
+      .log-entry.success {
+        color: #00b894;
+      }
+      .log-entry.error {
+        color: #ff6b6b;
+      }
+      .log-entry.info {
+        color: #48dbfb;
+      }
+      .log-entry.warning {
+        color: #fdcb6e;
+      }
+
+      .popup-info {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        margin: 8px 0;
+        font-size: 11px;
+      }
+
+      .popup-info.active {
+        background: rgba(72, 219, 251, 0.2);
+        border: 1px solid rgba(72, 219, 251, 0.3);
+      }
+
+      @media (max-width: 768px) {
+        .test-container {
+          grid-template-columns: 1fr;
+        }
+
+        .control-btn {
+          font-size: 10px;
+          padding: 6px 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <h2 style="margin: 0 0 20px 0; color: #48dbfb">🧪 Popup System Test</h2>
+
+        <!-- Quick Actions -->
+        <div class="control-section">
+          <h3>Quick Actions</h3>
+          <button class="control-btn success" onclick="testAlert()">
+            Test Alert
+          </button>
+          <button class="control-btn warning" onclick="testConfirm()">
+            Test Confirm
+          </button>
+          <button class="control-btn" onclick="testNotification()">
+            Test Notification
+          </button>
+          <button class="control-btn" onclick="testCustomPopup()">
+            Custom Popup
+          </button>
+        </div>
+
+        <!-- Template System -->
+        <div class="control-section">
+          <h3>Template System</h3>
+          <button
+            class="control-btn success"
+            onclick="registerExampleTemplates()"
+          >
+            Register Examples
+          </button>
+          <button class="control-btn" onclick="showTemplateList()">
+            List Templates
+          </button>
+          <button class="control-btn danger" onclick="testGameOver()">
+            Game Over Example
+          </button>
+          <button class="control-btn" onclick="testLevelComplete()">
+            Level Complete Example
+          </button>
+        </div>
+
+        <!-- Custom Popup Builder -->
+        <div class="control-section">
+          <h3>Custom Popup Builder</h3>
+
+          <div class="input-group">
+            <label>Title:</label>
+            <input
+              type="text"
+              id="popup-title"
+              value="Custom Popup"
+              placeholder="Enter title"
+            />
+          </div>
+
+          <div class="input-group">
+            <label>Type:</label>
+            <select id="popup-type">
+              <option value="custom">Custom</option>
+              <option value="alert">Alert</option>
+              <option value="confirm">Confirm</option>
+              <option value="notification">Notification</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Size:</label>
+            <select id="popup-size">
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Content:</label>
+            <textarea
+              id="popup-content"
+              rows="3"
+              placeholder="Enter popup content..."
+            >
+Hello! This is a custom popup with your content.</textarea
+            >
+          </div>
+
+          <div class="input-group">
+            <label>Icon:</label>
+            <input
+              type="text"
+              id="popup-icon"
+              value="🎮"
+              placeholder="Emoji or text"
+            />
+          </div>
+
+          <button class="control-btn full-width" onclick="createCustomPopup()">
+            Create Custom Popup
+          </button>
+        </div>
+
+        <!-- Popup Management -->
+        <div class="control-section">
+          <h3>Popup Management</h3>
+          <button class="control-btn" onclick="testMultiplePopups()">
+            Multiple Popups
+          </button>
+          <button class="control-btn" onclick="testStackedNotifications()">
+            Stacked Notifications
+          </button>
+          <button class="control-btn danger" onclick="closeAllPopups()">
+            Close All
+          </button>
+          <button class="control-btn" onclick="showPopupStats()">
+            Show Stats
+          </button>
+        </div>
+
+        <!-- Advanced Tests -->
+        <div class="control-section">
+          <h3>Advanced Tests</h3>
+          <button class="control-btn" onclick="testKeyboardNavigation()">
+            Keyboard Nav
+          </button>
+          <button class="control-btn" onclick="testAccessibility()">
+            Accessibility
+          </button>
+          <button class="control-btn" onclick="testAnimations()">
+            Animations
+          </button>
+          <button class="control-btn" onclick="testMobileView()">
+            Mobile View
+          </button>
+        </div>
+
+        <!-- Integration Tests -->
+        <div class="control-section">
+          <h3>Integration Tests</h3>
+          <button class="control-btn" onclick="testGameIntegration()">
+            Game Integration
+          </button>
+          <button class="control-btn" onclick="testEventSystem()">
+            Event System
+          </button>
+          <button class="control-btn" onclick="testTemplateSystem()">
+            Template System
+          </button>
+          <button class="control-btn" onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <!-- Active Popups -->
+        <div class="control-section">
+          <h3>Active Popups</h3>
+          <div id="popup-list">
+            <div
+              style="
+                font-size: 12px;
+                opacity: 0.7;
+                text-align: center;
+                padding: 20px;
+              "
+            >
+              No popups active
+            </div>
+          </div>
+        </div>
+
+        <!-- Debug Log -->
+        <div class="debug-log" id="debug-log">
+          <div class="log-entry info">Popup system initializing...</div>
+        </div>
+      </div>
+
+      <!-- Main Test Area -->
+      <div class="main-area">
+        <h1 style="margin: 0 0 20px 0">Popup System Test Area</h1>
+        <p style="font-size: 18px; opacity: 0.8; margin-bottom: 30px">
+          Test all popup types and configurations!
+        </p>
+
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+          "
+        >
+          <h3 style="color: #48dbfb; margin: 0 0 15px 0">Test Instructions:</h3>
+          <ol style="text-align: left; font-size: 14px; line-height: 1.6">
+            <li>Try each popup type using the control panel</li>
+            <li>Test keyboard navigation (Tab, Enter, Escape)</li>
+            <li>Test mobile responsiveness by resizing window</li>
+            <li>Try multiple popups and stacking behavior</li>
+            <li>Use custom popup builder for your own content</li>
+            <li>Check accessibility features and focus management</li>
+          </ol>
+        </div>
+
+        <div style="margin-top: 30px; font-size: 12px; opacity: 0.6">
+          <strong>Tip:</strong> Check the debug log for detailed system
+          information!
+        </div>
+      </div>
+    </div>
+
+    <!-- Include Popup System Files -->
+    <script src="Popup.js"></script>
+    <script src="Popup-Manager.js"></script>
+
+    <script>
+      // Popup system instances
+      let popupManager;
+      let mockGame = {};
+
+      // Register example templates (USER CODE - not part of toolkit)
+      function registerExampleTemplates() {
+        try {
+          // Example Game Over template - this would be in user's game code
+          popupManager.registerTemplate("gameOver", {
+            title: "Game Over",
+            type: "custom",
+            size: "large",
+            showCloseButton: false,
+            content: (data) => `
+                        <div class="game-over-popup">
+                            <div class="game-over-icon">💀</div>
+                            <div class="game-over-message">
+                                <h2>Game Over!</h2>
+                                <p>Final Score: <strong>${
+                                  data.score || 0
+                                }</strong></p>
+                                ${
+                                  data.highScore
+                                    ? `<p>New High Score! 🎉</p>`
+                                    : ""
+                                }
+                                ${data.message ? `<p>${data.message}</p>` : ""}
+                            </div>
+                        </div>
+                    `,
+            buttons: [
+              { text: "Try Again", action: "restart", primary: true },
+              { text: "Main Menu", action: "menu", secondary: true },
+            ],
+          });
+
+          // Example Level Complete template
+          popupManager.registerTemplate("levelComplete", {
+            title: "Level Complete!",
+            type: "custom",
+            size: "medium",
+            content: (data) => `
+                        <div class="level-complete-popup">
+                            <div class="level-complete-icon">⭐</div>
+                            <div class="level-complete-message">
+                                <h2>Congratulations!</h2>
+                                <p>Level ${data.level || 1} Complete</p>
+                                <div class="level-stats">
+                                    <div class="stat">
+                                        <span class="stat-label">Score:</span>
+                                        <span class="stat-value">${
+                                          data.score || 0
+                                        }</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-label">Time:</span>
+                                        <span class="stat-value">${
+                                          data.time || "0:00"
+                                        }</span>
+                                    </div>
+                                    ${
+                                      data.bonus
+                                        ? `
+                                        <div class="stat bonus">
+                                            <span class="stat-label">Bonus:</span>
+                                            <span class="stat-value">+${data.bonus}</span>
+                                        </div>
+                                    `
+                                        : ""
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    `,
+            buttons: [{ text: "Continue", action: "continue", primary: true }],
+          });
+
+          // Example Achievement Unlocked template
+          popupManager.registerTemplate("achievementUnlocked", {
+            title: "Achievement Unlocked!",
+            type: "custom",
+            size: "medium",
+            content: (data) => `
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 64px; margin-bottom: 20px;">🏆</div>
+                            <h2 style="color: #48dbfb; margin-bottom: 15px;">${
+                              data.name || "Achievement"
+                            }</h2>
+                            <p>${
+                              data.description || "You did something awesome!"
+                            }</p>
+                            <div style="background: rgba(72, 219, 251, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                                <strong>+${data.points || 10} Points</strong>
+                            </div>
+                        </div>
+                    `,
+            buttons: [{ text: "Awesome!", action: "close", primary: true }],
+          });
+
+          logMessage("Example templates registered (user code)", "success");
+        } catch (error) {
+          logMessage(`Template registration failed: ${error.message}`, "error");
+        }
+      }
+
+      function showTemplateList() {
+        try {
+          const stats = popupManager.getStats();
+          const templateList =
+            stats.templateNames.length > 0
+              ? stats.templateNames.join(", ")
+              : "No templates registered";
+
+          popupManager.showAlert(`Registered Templates: ${templateList}`, {
+            title: "Template Registry",
+            icon: "📋",
+          });
+
+          logMessage(`Template list shown: ${templateList}`, "info");
+        } catch (error) {
+          logMessage(`Template list failed: ${error.message}`, "error");
+        }
+      }
+
+      // Initialize the popup system
+      function initializePopupSystem() {
+        try {
+          // Create mock game object for testing
+          mockGame = {
+            settings: {
+              masterVolume: 75,
+              sfxVolume: 60,
+              musicVolume: 80,
+              fullscreen: false,
+              showFPS: true,
+            },
+            stats: {
+              level: 5,
+              score: 12500,
+              time: "2:34",
+              bonus: 500,
+            },
+          };
+
+          // Initialize popup manager
+          popupManager = new PopupManager(mockGame, {
+            enableDebugLogs: true,
+            enableGameIntegration: true,
+            notificationDuration: 3000,
+          });
+
+          logMessage("Popup system initialized successfully!", "success");
+          updatePopupList();
+        } catch (error) {
+          logMessage(`Initialization failed: ${error.message}`, "error");
+        }
+      }
+
+      // Quick action functions
+      async function testAlert() {
+        try {
+          await popupManager.showAlert("This is a test alert message!", {
+            title: "Test Alert",
+            icon: "⚠️",
+            buttonText: "Got it!",
+          });
+          logMessage("Alert test completed", "success");
+        } catch (error) {
+          logMessage(`Alert test failed: ${error.message}`, "error");
+        }
+      }
+
+      async function testConfirm() {
+        try {
+          const result = await popupManager.showConfirmation(
+            "Are you sure you want to delete this item?",
+            {
+              title: "Confirm Deletion",
+              icon: "🗑️",
+              confirmText: "Delete",
+              cancelText: "Keep",
+            }
+          );
+          logMessage(
+            `Confirmation result: ${result ? "Confirmed" : "Cancelled"}`,
+            result ? "success" : "info"
+          );
+        } catch (error) {
+          logMessage(`Confirmation test failed: ${error.message}`, "error");
+        }
+      }
+
+      function testNotification() {
+        try {
+          popupManager.showNotification("Achievement unlocked: Test Master!", {
+            icon: "🏆",
+            duration: 4000,
+          });
+          logMessage("Notification test completed", "success");
+        } catch (error) {
+          logMessage(`Notification test failed: ${error.message}`, "error");
+        }
+      }
+
+      function testCustomPopup() {
+        try {
+          const content = `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🎮</div>
+                        <h2 style="color: #48dbfb;">Custom Popup Test</h2>
+                        <p>This is a custom popup with HTML content!</p>
+                        <div style="background: rgba(72, 219, 251, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <strong>Features:</strong>
+                            <ul style="text-align: left; margin: 10px 0;">
+                                <li>HTML content support</li>
+                                <li>Custom styling</li>
+                                <li>Interactive elements</li>
+                                <li>Responsive design</li>
+                            </ul>
+                        </div>
+                        <button onclick="alert('Button in popup clicked!')" style="
+                            background: #48dbfb; 
+                            color: white; 
+                            border: none; 
+                            padding: 8px 16px; 
+                            border-radius: 4px; 
+                            cursor: pointer;
+                        ">Test Button</button>
+                    </div>
+                `;
+
+          popupManager.showCustomPopup(content, {
+            title: "Custom Content",
+            size: "large",
+            showCloseButton: true,
+          });
+
+          logMessage("Custom popup test completed", "success");
+        } catch (error) {
+          logMessage(`Custom popup test failed: ${error.message}`, "error");
+        }
+      }
+
+      // Template test functions (using registered templates)
+      async function testGameOver() {
+        try {
+          if (!popupManager.hasTemplate("gameOver")) {
+            await popupManager.showAlert(
+              "Please register example templates first!",
+              {
+                title: "Template Not Found",
+                icon: "❌",
+              }
+            );
+            return;
+          }
+
+          const result = await popupManager.showTemplate("gameOver", {
+            score: 15680,
+            highScore: true,
+            message: "You fought bravely!",
+          });
+          logMessage(`Game Over result: ${result}`, "info");
+        } catch (error) {
+          logMessage(`Game Over test failed: ${error.message}`, "error");
+        }
+      }
+
+      async function testLevelComplete() {
+        try {
+          if (!popupManager.hasTemplate("levelComplete")) {
+            await popupManager.showAlert(
+              "Please register example templates first!",
+              {
+                title: "Template Not Found",
+                icon: "❌",
+              }
+            );
+            return;
+          }
+
+          const result = await popupManager.showTemplate("levelComplete", {
+            level: 3,
+            score: 2500,
+            time: "1:23",
+            bonus: 500,
+          });
+          logMessage(`Level Complete result: ${result}`, "info");
+        } catch (error) {
+          logMessage(`Level Complete test failed: ${error.message}`, "error");
+        }
+      }
+
+      // Custom popup builder
+      function createCustomPopup() {
+        try {
+          const title = document.getElementById("popup-title").value;
+          const type = document.getElementById("popup-type").value;
+          const size = document.getElementById("popup-size").value;
+          const content = document.getElementById("popup-content").value;
+          const icon = document.getElementById("popup-icon").value;
+
+          if (type === "alert") {
+            popupManager.showAlert(content, { title, icon });
+          } else if (type === "confirm") {
+            popupManager
+              .showConfirmation(content, { title, icon })
+              .then((result) =>
+                logMessage(`Custom confirm result: ${result}`, "info")
+              );
+          } else if (type === "notification") {
+            popupManager.showNotification(content, { icon });
+          } else {
+            const htmlContent = `
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 36px; margin-bottom: 15px;">${icon}</div>
+                            <div style="font-size: 16px; line-height: 1.6;">${content}</div>
+                        </div>
+                    `;
+
+            popupManager.showCustomPopup(htmlContent, { title, size, type });
+          }
+
+          logMessage(`Created custom ${type} popup`, "success");
+        } catch (error) {
+          logMessage(`Custom popup creation failed: ${error.message}`, "error");
+        }
+      }
+
+      // Management functions
+      function testMultiplePopups() {
+        try {
+          // Simple, direct calls - let the system handle everything
+          popupManager.showAlert("First popup");
+          popupManager.showNotification("Second notification");
+          popupManager.showCustomPopup("<p>Third custom popup</p>", {
+            title: "Third",
+          });
+
+          logMessage("Multiple popups test started", "info");
+        } catch (error) {
+          logMessage(`Multiple popups test failed: ${error.message}`, "error");
+        }
+      }
+
+      function testStackedNotifications() {
+        try {
+          const messages = [
+            "First notification",
+            "Second notification",
+            "Third notification",
+            "Fourth notification",
+          ];
+
+          // Simple, direct calls - let the system handle timing
+          messages.forEach((message, index) => {
+            popupManager.showNotification(message, {
+              icon: ["📢", "📣", "📯", "🔔"][index],
+            });
+          });
+
+          logMessage("Stacked notifications test started", "info");
+        } catch (error) {
+          logMessage(
+            `Stacked notifications test failed: ${error.message}`,
+            "error"
+          );
+        }
+      }
+
+      function testAnimations() {
+        try {
+          const animations = ["fade", "slide", "bounce"];
+
+          // Simple test - system should handle any timing issues
+          animations.forEach((animation, index) => {
+            popupManager.showNotification(
+              `${animation.toUpperCase()} animation test`,
+              {
+                icon: "🎭",
+                animation: animation,
+              }
+            );
+          });
+
+          logMessage("Animation tests started", "info");
+        } catch (error) {
+          logMessage(`Animation test failed: ${error.message}`, "error");
+        }
+      }
+
+      function closeAllPopups() {
+        try {
+          popupManager.closeAll();
+          logMessage("All popups closed", "success");
+          updatePopupList();
+        } catch (error) {
+          logMessage(`Close all failed: ${error.message}`, "error");
+        }
+      }
+
+      function showPopupStats() {
+        try {
+          const stats = popupManager.getStats();
+          const message = `Stats: ${stats.totalTemplates} templates, ${stats.openPopups} open popups, ${stats.queuedNotifications} queued notifications`;
+          popupManager.showAlert(message, {
+            title: "Popup System Stats",
+            icon: "📊",
+          });
+          logMessage(message, "info");
+        } catch (error) {
+          logMessage(`Stats display failed: ${error.message}`, "error");
+        }
+      }
+
+      // Advanced test functions
+      function testKeyboardNavigation() {
+        try {
+          const content = `
+                    <div style="padding: 20px;">
+                        <h3>Keyboard Navigation Test</h3>
+                        <p>Try these keyboard interactions:</p>
+                        <ul style="text-align: left;">
+                            <li><strong>Tab:</strong> Navigate between buttons</li>
+                            <li><strong>Enter:</strong> Activate focused button</li>
+                            <li><strong>Escape:</strong> Close popup</li>
+                            <li><strong>Shift+Tab:</strong> Navigate backwards</li>
+                        </ul>
+                        <input type="text" placeholder="Test input field" style="width: 100%; padding: 8px; margin: 10px 0;">
+                    </div>
+                `;
+
+          popupManager.showCustomPopup(content, {
+            title: "Keyboard Test",
+            size: "medium",
+            buttons: [
+              { text: "Button 1", action: "btn1" },
+              { text: "Button 2", action: "btn2" },
+              { text: "Close", action: "close", primary: true },
+            ],
+          });
+
+          logMessage("Keyboard navigation test started", "info");
+        } catch (error) {
+          logMessage(`Keyboard test failed: ${error.message}`, "error");
+        }
+      }
+
+      function testAccessibility() {
+        try {
+          popupManager.showAlert(
+            "This popup includes ARIA labels, focus management, and screen reader support!",
+            {
+              title: "Accessibility Test",
+              icon: "♿",
+              buttonText: "Accessible!",
+            }
+          );
+
+          logMessage(
+            "Accessibility test completed - check with screen reader",
+            "info"
+          );
+        } catch (error) {
+          logMessage(`Accessibility test failed: ${error.message}`, "error");
+        }
+      }
+
+      function testAnimations() {
+        try {
+          const animations = ["fade", "slide", "bounce"];
+          animations.forEach((animation, index) => {
+            setTimeout(() => {
+              popupManager.showNotification(
+                `${animation.toUpperCase()} animation test`,
+                {
+                  icon: "🎭",
+                  animation: animation,
+                }
+              );
+            }, index * 1000);
+          });
+
+          logMessage("Animation tests started", "info");
+        } catch (error) {
+          logMessage(`Animation test failed: ${error.message}`, "error");
+        }
+      }
+
+      function testMobileView() {
+        try {
+          const content = `
+                    <div style="padding: 15px;">
+                        <h3>Mobile Responsive Test</h3>
+                        <p>This popup adapts to different screen sizes:</p>
+                        <div style="background: rgba(72, 219, 251, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0;">
+                            <strong>Mobile Features:</strong><br>
+                            • Responsive sizing<br>
+                            • Touch-friendly buttons<br>
+                            • Optimal spacing<br>
+                            • Readable text
+                        </div>
+                        <p style="font-size: 12px; opacity: 0.8;">Try resizing your browser window!</p>
+                    </div>
+                `;
+
+          popupManager.showCustomPopup(content, {
+            title: "Mobile Test",
+            size: "large",
+          });
+
+          logMessage("Mobile view test completed", "info");
+        } catch (error) {
+          logMessage(`Mobile test failed: ${error.message}`, "error");
+        }
+      }
+
+      // Integration test functions
+      function testGameIntegration() {
+        try {
+          // Test game integration methods
+          if (mockGame.showAlert) {
+            mockGame.showAlert("Game integration working!", { icon: "🎮" });
+            logMessage("Game integration test completed", "success");
+          } else {
+            logMessage("Game integration not active", "warning");
+          }
+        } catch (error) {
+          logMessage(`Game integration test failed: ${error.message}`, "error");
+        }
+      }
+
+      function testEventSystem() {
+        try {
+          // Simulate game events
+          if (typeof mockGame.on === "function") {
+            mockGame.on("test-event", (data) => {
+              logMessage(`Event received: ${JSON.stringify(data)}`, "info");
+            });
+          }
+
+          logMessage("Event system test completed", "info");
+        } catch (error) {
+          logMessage(`Event system test failed: ${error.message}`, "error");
+        }
+      }
+
+      function testTemplateSystem() {
+        try {
+          // Test template registration and usage
+          popupManager.registerTemplate("testTemplate", {
+            title: "Test Template",
+            content: (data) => `
+                        <div style="text-align: center; padding: 20px;">
+                            <h3>Custom Template Test</h3>
+                            <p>Template system working!</p>
+                            <p>Data passed: ${JSON.stringify(data)}</p>
+                            <div style="background: rgba(72, 219, 251, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0;">
+                                <strong>This template was registered by user code</strong>
+                            </div>
+                        </div>
+                    `,
+            buttons: [{ text: "OK", action: "close", primary: true }],
+          });
+
+          popupManager.showTemplate("testTemplate", {
+            test: "data",
+            timestamp: Date.now(),
+            userDefined: true,
+          });
+
+          logMessage("Template system test completed", "success");
+        } catch (error) {
+          logMessage(`Template system test failed: ${error.message}`, "error");
+        }
+      }
+
+      // Update popup list display
+      function updatePopupList() {
+        const listContainer = document.getElementById("popup-list");
+
+        if (!popupManager || !popupManager.popup) {
+          listContainer.innerHTML =
+            '<div style="font-size: 12px; opacity: 0.7; text-align: center; padding: 20px;">System not ready</div>';
+          return;
+        }
+
+        const popups = popupManager.popup.popupStack || [];
+
+        if (popups.length === 0) {
+          listContainer.innerHTML =
+            '<div style="font-size: 12px; opacity: 0.7; text-align: center; padding: 20px;">No popups active</div>';
+          return;
+        }
+
+        listContainer.innerHTML = popups
+          .map(
+            (popup) => `
+                <div class="popup-info ${popup.isVisible ? "active" : ""}">
+                    <div style="font-weight: bold;">${popup.id}</div>
+                    <div style="font-size: 10px; opacity: 0.8;">
+                        ${popup.options.type} • ${
+              popup.isVisible ? "VISIBLE" : "HIDDEN"
+            }
+                    </div>
+                    <button class="control-btn" onclick="popupManager.closePopup('${
+                      popup.id
+                    }')" style="font-size: 10px; padding: 2px 6px; margin-top: 5px;">
+                        Close
+                    </button>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      // Logging function
+      function logMessage(message, type = "info") {
+        const log = document.getElementById("debug-log");
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+
+        // Keep only last 100 messages
+        while (log.children.length > 100) {
+          log.removeChild(log.firstChild);
+        }
+      }
+
+      function clearLog() {
+        document.getElementById("debug-log").innerHTML = "";
+        logMessage("Log cleared", "info");
+      }
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        logMessage("Page loaded, initializing popup system...", "info");
+        setTimeout(initializePopupSystem, 100);
+      });
+
+      // Update popup list periodically
+      setInterval(() => {
+        updatePopupList();
+      }, 2000);
+    </script>
+  </body>
+</html>
