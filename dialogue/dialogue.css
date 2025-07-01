@@ -1,0 +1,611 @@
+/* Universal Dialogue System CSS - Complete Styling */
+
+/* CSS Variables for easy theming */
+:root {
+  --dialogue-background: #ffffff;
+  --dialogue-border: rgba(0, 0, 0, 0.1);
+  --dialogue-text-primary: #000000;
+  --dialogue-text-secondary: #333333;
+  --dialogue-character-name: #1e40af;
+  --dialogue-button-primary: #1e3a8a;
+  --dialogue-button-hover: #1d4ed8;
+  --dialogue-choice-background: rgba(0, 0, 0, 0.03);
+  --dialogue-choice-border: rgba(0, 0, 0, 0.08);
+  --dialogue-choice-hover: rgba(30, 64, 175, 0.1);
+  --dialogue-avatar-size: 60px;
+  --dialogue-border-radius: 8px;
+  --dialogue-shadow: rgba(0, 0, 0, 0.1);
+  --dialogue-transition-speed: 0.2s;
+  --dialogue-z-index: 2000;
+}
+
+/* Main dialogue container */
+.dialogue-manager-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--dialogue-z-index);
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+/* Dialogue panel */
+.dialogue-panel {
+  color: #000000;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 90%;
+  max-width: 800px;
+  background: var(--dialogue-background);
+  border: 2px solid var(--dialogue-border);
+  border-radius: var(--dialogue-border-radius);
+  box-shadow: 0 20px 40px var(--dialogue-shadow);
+  backdrop-filter: blur(15px);
+  transition: transform var(--dialogue-transition-speed)
+    cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.dialogue-panel.dialogue-visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Dialogue content wrapper */
+.dialogue-content {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 5px;
+}
+
+/* Character section */
+.dialogue-character {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0px;
+  min-height: var(--dialogue-avatar-size);
+}
+
+.dialogue-character-avatar {
+  width: var(--dialogue-avatar-size);
+  height: var(--dialogue-avatar-size);
+  border-radius: 50%;
+  border: 3px solid var(--dialogue-border);
+  object-fit: cover;
+  transition: all var(--dialogue-transition-speed) ease;
+  flex-shrink: 0;
+}
+
+.dialogue-character-avatar:hover {
+  transform: scale(1.05);
+  border-color: var(--dialogue-character-name);
+}
+
+.dialogue-character-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--dialogue-character-name);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+}
+
+/* Text container */
+.dialogue-text-container {
+  flex: 1;
+  position: relative;
+}
+
+.dialogue-text {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--dialogue-text-primary);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  word-wrap: break-word;
+  position: relative;
+}
+
+/* Typewriter cursor effect */
+.dialogue-text.typing::after {
+  content: "|";
+  animation: blink 1s infinite;
+  color: var(--dialogue-character-name);
+  font-weight: bold;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Choice container */
+.dialogue-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--dialogue-character-name) transparent;
+}
+
+.dialogue-choices::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dialogue-choices::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dialogue-choices::-webkit-scrollbar-thumb {
+  background: var(--dialogue-character-name);
+  border-radius: 4px;
+}
+
+/* Choice buttons */
+.dialogue-choice-button {
+  background: var(--dialogue-choice-background);
+  border: 2px solid var(--dialogue-choice-border);
+  color: var(--dialogue-text-primary);
+  padding: 15px 20px;
+  border-radius: var(--dialogue-border-radius);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dialogue-transition-speed) ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.dialogue-choice-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.dialogue-choice-button:hover {
+  background: var(--dialogue-choice-hover);
+  border-color: var(--dialogue-character-name);
+  transform: translateX(8px);
+  box-shadow: 0 4px 15px rgba(72, 219, 251, 0.2);
+}
+
+.dialogue-choice-button:hover::before {
+  left: 100%;
+}
+
+.dialogue-choice-button:active {
+  transform: translateX(4px) scale(0.98);
+}
+
+.dialogue-choice-button.highlighted {
+  border-color: var(--dialogue-character-name);
+  background: rgba(72, 219, 251, 0.1);
+  box-shadow: 0 0 10px rgba(72, 219, 251, 0.3);
+}
+
+.dialogue-choice-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.dialogue-choice-button.disabled:hover {
+  background: var(--dialogue-choice-background);
+  border-color: var(--dialogue-choice-border);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Controls section */
+.dialogue-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+/* Continue button */
+.dialogue-continue-button {
+  background: var(--dialogue-button-primary);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  margin: 0px;
+  border-radius: var(--dialogue-border-radius);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all var(--dialogue-transition-speed) ease;
+  font-family: inherit;
+  box-shadow: 0 4px 15px rgba(72, 219, 251, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.dialogue-continue-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transition: all 0.6s ease;
+  transform: translate(-50%, -50%);
+}
+
+.dialogue-continue-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(72, 219, 251, 0.4);
+  background: var(--dialogue-button-hover);
+}
+
+.dialogue-continue-button:hover::before {
+  width: 200%;
+  height: 200%;
+}
+
+.dialogue-continue-button:active {
+  transform: translateY(0);
+}
+
+.dialogue-continue-button:focus {
+  outline: 3px solid rgba(72, 219, 251, 0.5);
+  outline-offset: 2px;
+}
+
+/* Continue button animation */
+.dialogue-continue-button.pulse {
+  animation: pulse-continue 2s infinite;
+}
+
+@keyframes pulse-continue {
+  0% {
+    box-shadow: 0 4px 15px rgba(72, 219, 251, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 25px rgba(72, 219, 251, 0.6);
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 4px 15px rgba(72, 219, 251, 0.3);
+  }
+}
+
+/* Special dialogue states */
+.dialogue-panel.thinking .dialogue-text::after {
+  content: "...";
+  animation: thinking 1.5s infinite;
+  color: var(--dialogue-character-name);
+}
+
+@keyframes thinking {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .dialogue-panel {
+    bottom: 10px;
+    width: 95%;
+    max-width: none;
+  }
+
+  .dialogue-content {
+    padding: 10px;
+    gap: 5px;
+  }
+
+  .dialogue-character {
+    gap: 12px;
+    margin-bottom: 0px;
+  }
+
+  :root {
+    --dialogue-avatar-size: 60px;
+  }
+
+  .dialogue-character-name {
+    font-size: 18px;
+  }
+
+  .dialogue-text {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .dialogue-choice-button {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  .dialogue-choice-button:hover {
+    transform: translateX(4px);
+  }
+
+  .dialogue-continue-button {
+    padding: 10px 20px;
+    font-size: 15px;
+  }
+
+  .dialogue-controls {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .dialogue-panel {
+    bottom: 5px;
+    width: 98%;
+  }
+
+  .dialogue-content {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  :root {
+    --dialogue-avatar-size: 50px;
+  }
+
+  .dialogue-character {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .dialogue-character-name {
+    font-size: 16px;
+  }
+
+  .dialogue-text {
+    font-size: 15px;
+    text-align: center;
+  }
+
+  .dialogue-choice-button {
+    padding: 10px 14px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .dialogue-choice-button:hover {
+    transform: none;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .dialogue-panel,
+  .dialogue-choice-button,
+  .dialogue-continue-button,
+  .dialogue-character-avatar {
+    transition: none;
+  }
+
+  .dialogue-choice-button:hover,
+  .dialogue-continue-button:hover {
+    transform: none;
+  }
+
+  @keyframes blink,
+  @keyframes thinking,
+  @keyframes pulse-continue {
+    from,
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* Print styles */
+@media print {
+  .dialogue-manager-container {
+    display: none !important;
+  }
+}
+
+/* Performance optimizations */
+.dialogue-panel,
+.dialogue-choice-button,
+.dialogue-continue-button {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Focus visible support */
+@supports selector(:focus-visible) {
+  .dialogue-choice-button:focus {
+    outline: none;
+  }
+
+  .dialogue-choice-button:focus-visible {
+    outline: 3px solid var(--dialogue-character-name);
+    outline-offset: 2px;
+  }
+
+  .dialogue-continue-button:focus {
+    outline: none;
+  }
+
+  .dialogue-continue-button:focus-visible {
+    outline: 3px solid rgba(72, 219, 251, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+/* Custom scroll behavior */
+@supports (scroll-behavior: smooth) {
+  .dialogue-choices {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Backdrop filter fallback */
+@supports not (backdrop-filter: blur(15px)) {
+  .dialogue-panel {
+    background: rgba(26, 32, 44, 0.98);
+  }
+}
+
+/* Theme variants */
+.dialogue-theme-fantasy {
+  --dialogue-background: rgba(75, 54, 124, 0.98);
+  --dialogue-character-name: #ffd700;
+  --dialogue-button-primary: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+}
+
+.dialogue-theme-scifi {
+  --dialogue-background: rgba(13, 42, 58, 0.98);
+  --dialogue-character-name: #00ffff;
+  --dialogue-button-primary: linear-gradient(135deg, #00ffff 0%, #0080ff 100%);
+}
+
+.dialogue-theme-horror {
+  --dialogue-background: rgba(40, 20, 20, 0.98);
+  --dialogue-character-name: #ff4444;
+  --dialogue-button-primary: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+}
+
+/* Animation classes for JavaScript control */
+.dialogue-fade-in {
+  animation: dialogueFadeIn 0.5s ease-out;
+}
+
+.dialogue-slide-up {
+  animation: dialogueSlideUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes dialogueFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes dialogueSlideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Accessibility improvements */
+.dialogue-choice-button[aria-selected="true"] {
+  background: var(--dialogue-choice-hover);
+  border-color: var(--dialogue-character-name);
+}
+
+.dialogue-text[aria-live="polite"] {
+  /* Screen reader will announce text changes */
+}
+
+/* Skip indicator for fast readers */
+.dialogue-skip-indicator {
+  position: absolute;
+  bottom: 10px;
+  right: 20px;
+  font-size: 12px;
+  opacity: 0.6;
+  color: var(--dialogue-text-secondary);
+}
+
+/* Choice numbering for keyboard navigation */
+.dialogue-choice-button::before {
+  content: counter(choice-counter) ". ";
+  counter-increment: choice-counter;
+  font-weight: bold;
+  color: var(--dialogue-character-name);
+}
+
+.dialogue-choices {
+  counter-reset: choice-counter;
+}
+
+/* Compact layout overrides */
+.dialogue-panel {
+  bottom: 10px;
+  padding: 0;
+}
+
+.dialogue-content {
+  padding: 10px;
+  gap: 5px;
+}
+
+.dialogue-character {
+  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.dialogue-choice-button {
+  padding: 8px 12px;
+  font-size: 15px;
+  background: var(--dialogue-button-primary);
+  color: #ffffff;
+  border: none;
+  box-shadow: none;
+}
+
+.dialogue-choice-button:hover {
+  background: var(--dialogue-button-hover);
+  color: #ffffff;
+}
+
+.dialogue-continue-button {
+  background: var(--dialogue-button-primary);
+  color: #ffffff;
+  border: none;
+  box-shadow: none;
+}
+
+.dialogue-continue-button:hover {
+  background: var(--dialogue-button-hover);
+  color: #ffffff;
+}
+
+.dialogue-controls {
+  margin-top: 6px;
+}

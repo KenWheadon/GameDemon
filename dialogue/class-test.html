@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dialogue System Test</title>
+    <link rel="stylesheet" href="dialogue.css" />
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #1a202c;
+        color: white;
+        text-align: center;
+        padding: 40px;
+      }
+      button {
+        margin: 20px;
+        padding: 12px 24px;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        background: #48dbfb;
+        color: #000;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🗣️ Dialogue System Test</h1>
+    <button onclick="startTestConversation()">Start Test</button>
+
+    <div id="dialogue-container"></div>
+
+    <script src="dialogue.js"></script>
+    <script src="dialogue-manager.js"></script>
+    <script>
+      let manager;
+
+      window.addEventListener("DOMContentLoaded", () => {
+        manager = new DialogueManager(
+          {},
+          {
+            enableDebugLogs: true,
+            containerSelector: "#dialogue-container",
+          }
+        );
+
+        manager.registerCharacter("tester", {
+          name: "Test Character",
+          textColor: "#000000",
+          nameColor: "#000000",
+          avatar: null,
+        });
+
+        manager.registerConversation("test_chat", [
+          {
+            character: "tester",
+            text: "Hello! This is a simple test dialogue.",
+          },
+          { character: "tester", text: "The system is working as expected." },
+          {
+            character: "tester",
+            text: "Would you like to continue?",
+            choices: [
+              { text: "Yes", next: 3 },
+              { text: "No", next: "end" },
+            ],
+          },
+          { character: "tester", text: "Great! You chose to continue." },
+        ]);
+
+        console.log("✅ Dialogue system initialized and test data loaded.");
+      });
+
+      function startTestConversation() {
+        manager.startConversation("test_chat");
+      }
+    </script>
+  </body>
+</html>
