@@ -3,1266 +3,419 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Audio Manager System - Standalone Test</title>
+    <title>Audio Manager - Simple Test</title>
     <link rel="stylesheet" href="audio-manager.css" />
     <style>
-      /* Test page specific styles */
       body {
-        font-family: "Comic Sans MS", cursive, sans-serif;
+        font-family: "Arial", sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         margin: 0;
-        padding: 20px;
+        padding: 40px;
         min-height: 100vh;
-      }
-
-      .test-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: 400px 1fr;
-        gap: 20px;
-      }
-
-      .control-panel {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 20px;
-        height: fit-content;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        position: sticky;
-        top: 20px;
-      }
-
-      .main-area {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 30px;
-        border: 2px dashed rgba(255, 255, 255, 0.3);
-        min-height: 600px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
         text-align: center;
       }
 
-      .control-section {
-        margin-bottom: 25px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
       }
 
-      .control-section:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-      }
-
-      .control-section h3 {
-        margin: 0 0 15px 0;
+      h1 {
         color: #48dbfb;
-        font-size: 16px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        margin-bottom: 30px;
+        font-size: 32px;
       }
 
-      .control-btn {
+      .audio-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 30px 0;
+      }
+
+      .audio-btn {
         background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
         border: none;
         color: white;
-        padding: 10px 14px;
-        border-radius: 8px;
+        padding: 15px 20px;
+        border-radius: 10px;
         cursor: pointer;
-        margin: 4px;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: bold;
         transition: all 0.3s ease;
-        font-family: inherit;
-        min-width: 80px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .audio-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 20px rgba(72, 219, 251, 0.4);
+      }
+
+      .audio-btn.music {
+        background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+      }
+
+      .audio-btn.sfx {
+        background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+      }
+
+      .audio-btn.playing {
+        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      .controls {
+        margin: 40px 0;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .control-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
       }
 
       .control-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 15px rgba(72, 219, 251, 0.3);
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
       }
 
-      .control-btn.danger {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-      }
-
-      .control-btn.success {
-        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
-      }
-
-      .control-btn.warning {
-        background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
-      }
-
-      .control-btn.full-width {
-        width: calc(100% - 8px);
-        margin: 4px 0;
-      }
-
-      .control-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .input-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 10px 0;
-        font-size: 13px;
-      }
-
-      .input-group label {
-        min-width: 80px;
-        font-weight: bold;
-        color: rgba(255, 255, 255, 0.9);
-      }
-
-      .input-group input,
-      .input-group select {
-        flex: 1;
-        padding: 6px 10px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        font-size: 12px;
-      }
-
-      .input-group input::placeholder {
-        color: rgba(255, 255, 255, 0.5);
-      }
-
-      .volume-slider {
-        flex: 1;
-        margin: 0 10px;
-      }
-
-      .volume-display {
-        min-width: 50px;
-        text-align: center;
-        background: rgba(255, 255, 255, 0.2);
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-weight: bold;
-        font-size: 11px;
-      }
-
-      .status-display {
+      .status {
         background: rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-        padding: 15px;
-        margin-top: 15px;
-        font-family: "Courier New", monospace;
-        font-size: 12px;
-      }
-
-      .status-row {
-        display: flex;
-        justify-content: space-between;
-        margin: 5px 0;
-        padding: 3px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .status-row:last-child {
-        border-bottom: none;
-      }
-
-      .status-label {
-        font-weight: bold;
-        color: #48dbfb;
-      }
-
-      .status-value {
-        color: #00b894;
-      }
-
-      .status-value.error {
-        color: #ff6b6b;
-      }
-
-      .status-value.warning {
-        color: #fdcb6e;
-      }
-
-      .debug-log {
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 8px;
-        padding: 12px;
-        max-height: 200px;
-        overflow-y: auto;
-        font-family: "Courier New", monospace;
-        font-size: 11px;
-        margin-top: 15px;
-      }
-
-      .log-entry {
-        margin: 2px 0;
-        opacity: 0.9;
-        word-break: break-word;
-      }
-
-      .log-entry.success {
-        color: #00b894;
-      }
-
-      .log-entry.error {
-        color: #ff6b6b;
-      }
-
-      .log-entry.info {
-        color: #48dbfb;
-      }
-
-      .log-entry.warning {
-        color: #fdcb6e;
-      }
-
-      .loading-indicator {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: #48dbfb;
-        animation: spin 1s ease-in-out infinite;
-        margin-left: 10px;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .audio-demo-section {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 20px;
-        margin: 20px 0;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-      }
-
-      .audio-demo-section h3 {
-        color: #48dbfb;
-        margin: 0 0 15px 0;
-        text-align: center;
-      }
-
-      .audio-waveform {
-        width: 100%;
-        height: 60px;
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-        margin: 15px 0;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .waveform-bar {
-        position: absolute;
-        bottom: 0;
-        width: 3px;
-        background: linear-gradient(to top, #48dbfb, #00b894);
-        transition: height 0.1s ease;
-        border-radius: 2px 2px 0 0;
-      }
-
-      .instructions {
-        background: rgba(255, 255, 255, 0.1);
         padding: 20px;
         border-radius: 10px;
-        max-width: 600px;
-      }
-
-      .instructions h3 {
-        color: #48dbfb;
-        margin: 0 0 15px 0;
-      }
-
-      .instructions ol {
+        margin-top: 30px;
+        font-family: "Courier New", monospace;
         text-align: left;
-        line-height: 1.6;
       }
 
-      .instructions li {
-        margin: 8px 0;
+      .loading {
+        font-size: 18px;
+        color: #48dbfb;
       }
 
-      @media (max-width: 768px) {
-        .test-container {
-          grid-template-columns: 1fr;
-        }
+      .error {
+        color: #ff6b6b;
+      }
 
-        .control-panel {
-          position: static;
-        }
-
-        .control-btn {
-          font-size: 11px;
-          padding: 8px 12px;
-        }
+      .success {
+        color: #00b894;
       }
     </style>
   </head>
   <body>
-    <div class="test-container">
-      <!-- Control Panel -->
-      <div class="control-panel">
-        <h2 style="margin: 0 0 20px 0; color: #48dbfb; text-align: center">
-          🎵 Audio Manager Test
-        </h2>
+    <div class="container">
+      <h1>🎵 Audio Manager Test</h1>
+      <p class="loading" id="status">Initializing audio system...</p>
 
-        <!-- Initialization Section -->
-        <div class="control-section">
-          <h3>System Control</h3>
-          <button
-            class="control-btn success full-width"
-            onclick="initializeAudioSystem()"
-          >
-            🚀 Initialize Audio System
-          </button>
-          <button
-            class="control-btn warning full-width"
-            onclick="preloadAllAudio()"
-          >
-            📥 Preload All Audio
-          </button>
-          <button
-            class="control-btn danger full-width"
-            onclick="destroyAudioSystem()"
-          >
-            💥 Destroy System
-          </button>
-        </div>
-
-        <!-- Background Music Controls -->
-        <div class="control-section">
-          <h3>Background Music</h3>
-          <div class="control-grid">
-            <button class="control-btn" onclick="playBackgroundMusic('menu')">
-              🎵 Menu
-            </button>
-            <button class="control-btn" onclick="playBackgroundMusic('level1')">
-              🌟 Level 1
-            </button>
-            <button class="control-btn" onclick="playBackgroundMusic('boss')">
-              👹 Boss
-            </button>
-            <button
-              class="control-btn"
-              onclick="playBackgroundMusic('victory')"
-            >
-              🎉 Victory
-            </button>
-          </div>
-          <div class="control-grid">
-            <button
-              class="control-btn warning"
-              onclick="stopBackgroundMusic(true)"
-            >
-              ⏹️ Stop (Fade)
-            </button>
-            <button
-              class="control-btn danger"
-              onclick="stopBackgroundMusic(false)"
-            >
-              ⏹️ Stop (Hard)
-            </button>
-          </div>
-        </div>
-
-        <!-- Sound Effects -->
-        <div class="control-section">
-          <h3>Sound Effects</h3>
-          <div class="control-grid">
-            <button class="control-btn" onclick="playSoundEffect('click')">
-              👆 Click
-            </button>
-            <button class="control-btn" onclick="playSoundEffect('hover')">
-              👉 Hover
-            </button>
-            <button
-              class="control-btn"
-              onclick="playSoundEffect('achievement')"
-            >
-              🏆 Achievement
-            </button>
-            <button class="control-btn" onclick="playSoundEffect('error')">
-              ❌ Error
-            </button>
-            <button class="control-btn" onclick="playSoundEffect('success')">
-              ✅ Success
-            </button>
-            <button
-              class="control-btn"
-              onclick="playSoundEffect('notification')"
-            >
-              🔔 Notify
-            </button>
-          </div>
-          <div class="input-group">
-            <label>Volume:</label>
-            <input
-              type="range"
-              class="volume-slider"
-              id="sfx-test-volume"
-              min="0"
-              max="100"
-              value="80"
-              oninput="updateSfxTestVolume(this.value)"
-            />
-            <span class="volume-display" id="sfx-volume-display">80%</span>
-          </div>
-          <div class="input-group">
-            <label>Speed:</label>
-            <input
-              type="range"
-              class="volume-slider"
-              id="sfx-test-speed"
-              min="25"
-              max="200"
-              value="100"
-              oninput="updateSfxTestSpeed(this.value)"
-            />
-            <span class="volume-display" id="sfx-speed-display">1.0x</span>
-          </div>
-        </div>
-
-        <!-- Volume Controls -->
-        <div class="control-section">
-          <h3>Volume Controls</h3>
-          <div class="input-group">
-            <label>Master:</label>
-            <input
-              type="range"
-              class="volume-slider"
-              id="master-volume"
-              min="0"
-              max="100"
-              value="100"
-              oninput="setMasterVolume(this.value)"
-            />
-            <span class="volume-display" id="master-volume-display">100%</span>
-          </div>
-          <div class="input-group">
-            <label>Music:</label>
-            <input
-              type="range"
-              class="volume-slider"
-              id="background-volume"
-              min="0"
-              max="100"
-              value="30"
-              oninput="setBackgroundVolume(this.value)"
-            />
-            <span class="volume-display" id="background-volume-display"
-              >30%</span
-            >
-          </div>
-          <div class="input-group">
-            <label>SFX:</label>
-            <input
-              type="range"
-              class="volume-slider"
-              id="sfx-volume"
-              min="0"
-              max="100"
-              value="70"
-              oninput="setSfxVolume(this.value)"
-            />
-            <span class="volume-display" id="sfx-volume-display">70%</span>
-          </div>
-        </div>
-
-        <!-- Toggle Controls -->
-        <div class="control-section">
-          <h3>Toggle Controls</h3>
-          <div class="control-grid">
-            <button class="control-btn" onclick="toggleMute()" id="mute-button">
-              🔊 Mute
-            </button>
-            <button
-              class="control-btn"
-              onclick="toggleBackgroundMusic()"
-              id="bg-button"
-            >
-              🎵 BG Music
-            </button>
-          </div>
-          <button
-            class="control-btn full-width"
-            onclick="toggleSoundEffects()"
-            id="sfx-button"
-          >
-            🔊 Sound Effects
-          </button>
-        </div>
-
-        <!-- Settings Management -->
-        <div class="control-section">
-          <h3>Settings</h3>
-          <div class="control-grid">
-            <button class="control-btn success" onclick="saveSettings()">
-              💾 Save
-            </button>
-            <button class="control-btn" onclick="loadSettings()">
-              📂 Load
-            </button>
-          </div>
-          <div class="control-grid">
-            <button class="control-btn warning" onclick="resetSettings()">
-              🔄 Reset
-            </button>
-            <button class="control-btn" onclick="showSettings()">
-              📊 Show Stats
-            </button>
-          </div>
-        </div>
-
-        <!-- UI Controls -->
-        <div class="control-section">
-          <h3>UI Testing</h3>
-          <button
-            class="control-btn full-width"
-            onclick="toggleAudioUI()"
-            id="ui-button"
-          >
-            🎛️ Toggle Settings Panel
-          </button>
-          <button class="control-btn full-width" onclick="testNotifications()">
-            🔔 Test Notifications
-          </button>
-        </div>
-
-        <!-- System Status -->
-        <div class="control-section">
-          <h3>System Status</h3>
-          <div class="status-display" id="system-status">
-            <div class="status-row">
-              <span class="status-label">Status:</span>
-              <span class="status-value" id="init-status">Not Initialized</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Assets:</span>
-              <span class="status-value" id="assets-status">0/0</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Playing:</span>
-              <span class="status-value" id="playing-status">None</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Audio Context:</span>
-              <span class="status-value" id="context-status">Unknown</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Debug Log -->
-        <div class="control-section">
-          <h3>Debug Log</h3>
-          <div class="debug-log" id="debug-log">
-            <div class="log-entry info">Audio Manager Test initialized...</div>
-          </div>
-          <button
-            class="control-btn warning full-width"
-            onclick="clearLog()"
-            style="margin-top: 10px"
-          >
-            🗑️ Clear Log
-          </button>
-        </div>
+      <div class="controls">
+        <button class="control-btn" onclick="stopAll()">⏹️ Stop All</button>
+        <button class="control-btn" onclick="toggleMute()" id="mute-btn">
+          🔊 Mute
+        </button>
       </div>
 
-      <!-- Main Test Area -->
-      <div class="main-area">
-        <h1 style="margin: 0 0 20px 0; color: #48dbfb">
-          🎵 Audio Manager Test Environment
-        </h1>
+      <div class="audio-grid" id="audio-grid">
+        <!-- Audio buttons will be generated here -->
+      </div>
 
-        <div class="instructions">
-          <h3>🧪 Test Instructions</h3>
-          <ol>
-            <li>
-              <strong>Initialize:</strong> Click "Initialize Audio System" to
-              start
-            </li>
-            <li>
-              <strong>Preload:</strong> Click "Preload All Audio" to load test
-              sounds
-            </li>
-            <li>
-              <strong>Test Music:</strong> Try different background music tracks
-            </li>
-            <li>
-              <strong>Test Effects:</strong> Play various sound effects with
-              different volumes/speeds
-            </li>
-            <li>
-              <strong>Volume Controls:</strong> Adjust master, music, and SFX
-              volumes
-            </li>
-            <li>
-              <strong>Toggle Features:</strong> Test mute, disable music/SFX
-            </li>
-            <li>
-              <strong>Settings:</strong> Save/load settings, view statistics
-            </li>
-            <li><strong>UI Panel:</strong> Test the audio settings UI panel</li>
-          </ol>
-        </div>
-
-        <!-- Audio Demonstration -->
-        <div class="audio-demo-section">
-          <h3>🎼 Audio Visualization</h3>
-          <p>Visual representation of audio activity</p>
-          <div class="audio-waveform" id="audio-waveform">
-            <!-- Waveform bars will be generated by JavaScript -->
-          </div>
-          <p><small>Bars show simulated audio levels during playback</small></p>
-        </div>
-
-        <!-- Performance Info -->
-        <div class="audio-demo-section">
-          <h3>⚡ Performance Info</h3>
-          <div class="status-display">
-            <div class="status-row">
-              <span class="status-label">Load Time:</span>
-              <span class="status-value" id="load-time">-- ms</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Memory Usage:</span>
-              <span class="status-value" id="memory-usage">-- KB</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Active Audio:</span>
-              <span class="status-value" id="active-audio">0</span>
-            </div>
-            <div class="status-row">
-              <span class="status-label">Browser:</span>
-              <span class="status-value" id="browser-info">--</span>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style="
-            margin-top: 30px;
-            font-size: 12px;
-            opacity: 0.7;
-            max-width: 500px;
-          "
-        >
-          <strong>Note:</strong> This test environment uses placeholder audio
-          files. In a real implementation, you would provide actual MP3/OGG
-          audio files. The system will gracefully handle missing audio files and
-          show appropriate error messages.
-        </div>
+      <div class="status" id="log">
+        <div>Loading audio files...</div>
       </div>
     </div>
 
-    <!-- Include Audio Manager Files -->
     <script src="Audio-Manager.js"></script>
     <script src="Audio-Manager-UI.js"></script>
 
     <script>
-      // Test environment variables
       let audioManager = null;
       let audioUI = null;
-      let isInitialized = false;
-      let sfxTestVolume = 0.8;
-      let sfxTestSpeed = 1.0;
-      let statusUpdateInterval = null;
-      let waveformInterval = null;
+      let currentlyPlaying = null;
 
-      // Initialize page
-      document.addEventListener("DOMContentLoaded", function () {
-        logMessage("Test environment loaded", "info");
-        setupWaveform();
-        updateBrowserInfo();
-        startStatusUpdates();
+      // List of common MP3 files to check for
+      const testFiles = [
+        "test.mp3",
+        "music.mp3",
+        "sound.mp3",
+        "audio.mp3",
+        "sample.mp3",
+        "demo.mp3",
+        "click.mp3",
+        "beep.mp3",
+        "tone.mp3",
+        "alert.mp3",
+        "notification.mp3",
+        "success.mp3",
+        "error.mp3",
+        "menu.mp3",
+        "level1.mp3",
+        "background.mp3",
+        "effect.mp3",
+      ];
+
+      // Auto-initialize on page load
+      document.addEventListener("DOMContentLoaded", async () => {
+        await initializeAudio();
       });
 
-      // Audio system initialization
-      async function initializeAudioSystem() {
-        if (isInitialized) {
-          logMessage("Audio system already initialized", "warning");
-          return;
-        }
-
+      async function initializeAudio() {
         try {
-          logMessage("Initializing Audio Manager...", "info");
+          log("🚀 Initializing AudioManager...", "info");
 
-          // Create audio manager with test configuration
+          // Initialize audio manager
           audioManager = new AudioManager({
-            enableDebugLogs: true,
-            autoPreload: false, // Manual preload for testing
-            fadeTransitionDuration: 1500,
-            backgroundVolume: 0.3,
-            sfxVolume: 0.7,
-            maxRetryAttempts: 2,
-            loadTimeout: 5000,
+            enableDebugLogs: false,
+            autoPreload: false,
           });
 
-          // Set up test audio files (these are placeholder paths)
-          audioManager.setAudioFiles({
-            backgroundMusic: {
-              menu: "audio/music/menu.mp3",
-              level1: "audio/music/level1.mp3",
-              boss: "audio/music/boss.mp3",
-              victory: "audio/music/victory.mp3",
-            },
-            soundEffects: {
-              click: "audio/sfx/click.mp3",
-              hover: "audio/sfx/hover.mp3",
-              achievement: "audio/sfx/achievement.mp3",
-              error: "audio/sfx/error.mp3",
-              success: "audio/sfx/success.mp3",
-              notification: "audio/sfx/notification.mp3",
-              select: "audio/sfx/select.mp3",
-              confirm: "audio/sfx/confirm.mp3",
-            },
+          await audioManager.init();
+
+          // Create simple UI (just floating button)
+          audioUI = new AudioManagerUI(audioManager, {
+            floatingButton: true,
+            enableNotifications: false,
           });
 
-          // Initialize the system
-          const success = await audioManager.init();
+          log("✅ Audio system ready!", "success");
 
-          if (success) {
-            // Create UI system
-            audioUI = new AudioManagerUI(audioManager, {
-              enableDebugLogs: true,
-              keyboardShortcuts: true,
-              autoSave: false, // Manual save for testing
-              floatingButton: true,
-              floatingButtonPosition: { bottom: "80px", right: "20px" },
-              enableNotifications: true,
-            });
-
-            isInitialized = true;
-            logMessage("Audio system initialized successfully!", "success");
-            updateSystemStatus();
-            updateVolumeControls();
-          } else {
-            throw new Error("Audio manager initialization failed");
-          }
+          // Scan for MP3 files
+          await scanForAudioFiles();
         } catch (error) {
-          logMessage(`Initialization failed: ${error.message}`, "error");
-          isInitialized = false;
+          log(`❌ Failed to initialize: ${error.message}`, "error");
         }
       }
 
-      // Preload all audio assets
-      async function preloadAllAudio() {
-        if (!audioManager) {
-          logMessage("Audio manager not initialized", "error");
+      async function scanForAudioFiles() {
+        log("🔍 Scanning for MP3 files...", "info");
+        document.getElementById("status").textContent =
+          "Scanning for audio files...";
+
+        const foundFiles = [];
+        const grid = document.getElementById("audio-grid");
+
+        // Test each potential file
+        for (const filename of testFiles) {
+          try {
+            const exists = await checkFileExists(filename);
+            if (exists) {
+              foundFiles.push(filename);
+              log(`📁 Found: ${filename}`, "success");
+            }
+          } catch (error) {
+            // File doesn't exist, skip silently
+          }
+        }
+
+        if (foundFiles.length === 0) {
+          document.getElementById("status").innerHTML = `
+                    <div class="error">No MP3 files found in root folder!</div>
+                    <div style="margin-top: 10px; font-size: 14px;">
+                        Add some MP3 files to the root folder and refresh.<br>
+                        Checked for: ${testFiles.slice(0, 5).join(", ")}...
+                    </div>
+                `;
           return;
         }
 
+        // Set up audio files
+        const audioFiles = {
+          backgroundMusic: {},
+          soundEffects: {},
+        };
+
+        foundFiles.forEach((filename) => {
+          const key = filename.replace(".mp3", "");
+          // Classify as music or sound effect based on name
+          if (
+            filename.includes("music") ||
+            filename.includes("background") ||
+            filename.includes("level") ||
+            filename.includes("menu")
+          ) {
+            audioFiles.backgroundMusic[key] = filename;
+          } else {
+            audioFiles.soundEffects[key] = filename;
+          }
+        });
+
+        audioManager.setAudioFiles(audioFiles);
+
+        // Create buttons for each file
+        foundFiles.forEach((filename) => {
+          createAudioButton(filename, grid);
+        });
+
+        document.getElementById("status").innerHTML = `
+                <div class="success">Found ${foundFiles.length} audio files!</div>
+                <div style="margin-top: 10px; font-size: 12px;">
+                    Click any button to test playback
+                </div>
+            `;
+
+        log(`🎵 Ready to test ${foundFiles.length} audio files`, "success");
+      }
+
+      async function checkFileExists(filename) {
+        return new Promise((resolve) => {
+          const audio = new Audio(filename);
+
+          const timeout = setTimeout(() => {
+            cleanup();
+            resolve(false);
+          }, 2000);
+
+          const cleanup = () => {
+            clearTimeout(timeout);
+            audio.removeEventListener("canplaythrough", onLoad);
+            audio.removeEventListener("error", onError);
+          };
+
+          const onLoad = () => {
+            cleanup();
+            resolve(true);
+          };
+
+          const onError = () => {
+            cleanup();
+            resolve(false);
+          };
+
+          audio.addEventListener("canplaythrough", onLoad);
+          audio.addEventListener("error", onError);
+          audio.load();
+        });
+      }
+
+      function createAudioButton(filename, container) {
+        const key = filename.replace(".mp3", "");
+        const isMusic =
+          filename.includes("music") ||
+          filename.includes("background") ||
+          filename.includes("level") ||
+          filename.includes("menu");
+
+        const button = document.createElement("button");
+        button.className = `audio-btn ${isMusic ? "music" : "sfx"}`;
+        button.innerHTML = `
+                <div>
+                    <div style="font-size: 20px; margin-bottom: 5px;">
+                        ${isMusic ? "🎵" : "🔊"}
+                    </div>
+                    <div>${key}</div>
+                    <div style="font-size: 11px; opacity: 0.8; margin-top: 3px;">
+                        ${isMusic ? "Music" : "Sound"}
+                    </div>
+                </div>
+            `;
+
+        button.onclick = () => playAudio(key, filename, isMusic, button);
+        container.appendChild(button);
+      }
+
+      async function playAudio(key, filename, isMusic, button) {
         try {
-          logMessage("Preloading audio assets...", "info");
-          showLoadingIndicator();
-
-          const startTime = Date.now();
-          const results = await audioManager.preloadAllAudio();
-          const loadTime = Date.now() - startTime;
-
-          document.getElementById("load-time").textContent = `${loadTime} ms`;
-
-          if (results.successful > 0) {
-            logMessage(
-              `Preload complete: ${results.successful}/${results.total} assets loaded in ${loadTime}ms`,
-              "success"
-            );
-          } else {
-            logMessage(
-              `Preload completed with errors: ${results.failed}/${results.total} failed`,
-              "warning"
-            );
+          // Stop any currently playing audio
+          if (currentlyPlaying) {
+            currentlyPlaying.classList.remove("playing");
+            if (isMusic) {
+              audioManager.stopBackgroundMusic(false);
+            }
           }
 
-          hideLoadingIndicator();
-          updateSystemStatus();
+          // Load the audio if needed
+          if (isMusic && !audioManager.backgroundMusic.has(key)) {
+            log(`Loading background music: ${filename}`, "info");
+            await audioManager.loadBackgroundMusic(key, filename);
+          } else if (!isMusic && !audioManager.soundEffects.has(key)) {
+            log(`Loading sound effect: ${filename}`, "info");
+            await audioManager.loadSoundEffect(key, filename);
+          }
+
+          // Play the audio
+          if (isMusic) {
+            const success = audioManager.playBackgroundMusic(key, false, true);
+            if (success) {
+              button.classList.add("playing");
+              currentlyPlaying = button;
+              log(`🎵 Playing music: ${filename}`, "success");
+            } else {
+              log(`❌ Failed to play music: ${filename}`, "error");
+            }
+          } else {
+            const success = audioManager.playSoundEffect(key, 1.0);
+            if (success) {
+              log(`🔊 Playing sound: ${filename}`, "success");
+              // Flash the button briefly
+              button.classList.add("playing");
+              setTimeout(() => button.classList.remove("playing"), 1000);
+            } else {
+              log(`❌ Failed to play sound: ${filename}`, "error");
+            }
+          }
         } catch (error) {
-          logMessage(`Preload failed: ${error.message}`, "error");
-          hideLoadingIndicator();
+          log(`❌ Error playing ${filename}: ${error.message}`, "error");
         }
       }
 
-      // Background music controls
-      function playBackgroundMusic(trackKey) {
-        if (!audioManager) {
-          logMessage("Audio manager not initialized", "error");
-          return;
+      function stopAll() {
+        if (audioManager) {
+          audioManager.stopBackgroundMusic(false);
+          if (currentlyPlaying) {
+            currentlyPlaying.classList.remove("playing");
+            currentlyPlaying = null;
+          }
+          log("⏹️ Stopped all audio", "info");
         }
-
-        const success = audioManager.playBackgroundMusic(trackKey, true, true);
-        if (success) {
-          logMessage(`Playing background music: ${trackKey}`, "success");
-          simulateWaveform();
-        } else {
-          logMessage(`Failed to play background music: ${trackKey}`, "error");
-        }
-        updateSystemStatus();
       }
 
-      function stopBackgroundMusic(fadeOut) {
-        if (!audioManager) {
-          logMessage("Audio manager not initialized", "error");
-          return;
-        }
-
-        const success = audioManager.stopBackgroundMusic(fadeOut);
-        if (success) {
-          logMessage(
-            `Background music stopped ${
-              fadeOut ? "(with fade)" : "(immediately)"
-            }`,
+      function toggleMute() {
+        if (audioManager) {
+          const isMuted = audioManager.toggleMute();
+          document.getElementById("mute-btn").textContent = isMuted
+            ? "🔇 Unmute"
+            : "🔊 Mute";
+          log(
+            `${isMuted ? "🔇" : "🔊"} Audio ${isMuted ? "muted" : "unmuted"}`,
             "info"
           );
-          stopWaveform();
-        }
-        updateSystemStatus();
-      }
-
-      // Sound effect controls
-      function playSoundEffect(effectKey) {
-        if (!audioManager) {
-          logMessage("Audio manager not initialized", "error");
-          return;
-        }
-
-        const success = audioManager.playSoundEffect(
-          effectKey,
-          sfxTestVolume,
-          sfxTestSpeed
-        );
-        if (success) {
-          logMessage(
-            `Played sound effect: ${effectKey} (vol: ${(
-              sfxTestVolume * 100
-            ).toFixed(0)}%, speed: ${sfxTestSpeed.toFixed(1)}x)`,
-            "success"
-          );
-          flashWaveform();
-        } else {
-          logMessage(`Failed to play sound effect: ${effectKey}`, "error");
         }
       }
 
-      // Volume controls
-      function setMasterVolume(value) {
-        if (!audioManager) return;
-
-        const volume = parseInt(value) / 100;
-        audioManager.setMasterVolume(volume);
-        document.getElementById(
-          "master-volume-display"
-        ).textContent = `${value}%`;
-        logMessage(`Master volume: ${value}%`, "info");
-      }
-
-      function setBackgroundVolume(value) {
-        if (!audioManager) return;
-
-        const volume = parseInt(value) / 100;
-        audioManager.setBackgroundVolume(volume);
-        document.getElementById(
-          "background-volume-display"
-        ).textContent = `${value}%`;
-        logMessage(`Background volume: ${value}%`, "info");
-      }
-
-      function setSfxVolume(value) {
-        if (!audioManager) return;
-
-        const volume = parseInt(value) / 100;
-        audioManager.setSfxVolume(volume);
-        document.getElementById("sfx-volume-display").textContent = `${value}%`;
-        logMessage(`SFX volume: ${value}%`, "info");
-      }
-
-      function updateSfxTestVolume(value) {
-        sfxTestVolume = parseInt(value) / 100;
-        document.getElementById("sfx-volume-display").textContent = `${value}%`;
-      }
-
-      function updateSfxTestSpeed(value) {
-        sfxTestSpeed = parseInt(value) / 100;
-        document.getElementById(
-          "sfx-speed-display"
-        ).textContent = `${sfxTestSpeed.toFixed(1)}x`;
-      }
-
-      // Toggle controls
-      function toggleMute() {
-        if (!audioManager) return;
-
-        const isMuted = audioManager.toggleMute();
-        const button = document.getElementById("mute-button");
-        button.textContent = isMuted ? "🔇 Unmute" : "🔊 Mute";
-        logMessage(`Audio ${isMuted ? "muted" : "unmuted"}`, "info");
-        updateSystemStatus();
-      }
-
-      function toggleBackgroundMusic() {
-        if (!audioManager) return;
-
-        const enabled = audioManager.toggleBackgroundMusic();
-        const button = document.getElementById("bg-button");
-        button.textContent = enabled ? "🎵 BG Music" : "🚫 BG Music";
-        logMessage(
-          `Background music ${enabled ? "enabled" : "disabled"}`,
-          "info"
-        );
-      }
-
-      function toggleSoundEffects() {
-        if (!audioManager) return;
-
-        const enabled = audioManager.toggleSoundEffects();
-        const button = document.getElementById("sfx-button");
-        button.textContent = enabled ? "🔊 Sound Effects" : "🚫 Sound Effects";
-        logMessage(`Sound effects ${enabled ? "enabled" : "disabled"}`, "info");
-      }
-
-      // Settings management
-      function saveSettings() {
-        if (!audioManager) return;
-
-        const success = audioManager.saveSettings();
-        if (success) {
-          logMessage("Settings saved to localStorage", "success");
-        } else {
-          logMessage("Failed to save settings", "error");
-        }
-      }
-
-      function loadSettings() {
-        if (!audioManager) return;
-
-        const success = audioManager.loadSettings();
-        if (success) {
-          logMessage("Settings loaded from localStorage", "success");
-          updateVolumeControls();
-          updateSystemStatus();
-        } else {
-          logMessage("No saved settings found", "warning");
-        }
-      }
-
-      function resetSettings() {
-        if (!audioManager) return;
-
-        if (confirm("Reset all audio settings to defaults?")) {
-          audioManager.resetSettings();
-          logMessage("Settings reset to defaults", "info");
-          updateVolumeControls();
-          updateSystemStatus();
-        }
-      }
-
-      function showSettings() {
-        if (!audioManager) return;
-
-        const stats = audioManager.getStats();
-        const message = `
-Audio System Statistics:
-• Loaded Assets: ${stats.loadedAssets}
-• Failed Assets: ${stats.failedAssets}
-• Background Tracks: ${stats.backgroundMusicTracks}
-• Sound Effects: ${stats.soundEffects}
-• Currently Playing: ${stats.currentlyPlaying || "None"}
-• Master Volume: ${(stats.volumes.master * 100).toFixed(0)}%
-• Background Volume: ${(stats.volumes.background * 100).toFixed(0)}%
-• SFX Volume: ${(stats.volumes.sfx * 100).toFixed(0)}%
-• Muted: ${stats.settings.isMuted ? "Yes" : "No"}
-• Audio Context: ${stats.audioContextState}
-            `.trim();
-
-        alert(message);
-        logMessage("Displayed audio statistics", "info");
-      }
-
-      // UI controls
-      function toggleAudioUI() {
-        if (!audioUI) {
-          logMessage("Audio UI not initialized", "error");
-          return;
-        }
-
-        audioUI.toggleSettingsPanel();
-        logMessage("Toggled audio settings panel", "info");
-      }
-
-      function testNotifications() {
-        if (!audioUI) {
-          logMessage("Audio UI not initialized", "error");
-          return;
-        }
-
-        const notifications = [
-          { message: "Test Info Notification", type: "info" },
-          { message: "Test Success Notification", type: "success" },
-          { message: "Test Warning Notification", type: "warning" },
-          { message: "Test Error Notification", type: "error" },
-        ];
-
-        notifications.forEach((notif, index) => {
-          setTimeout(() => {
-            audioUI.showNotification(notif.message, notif.type, 2000);
-          }, index * 500);
-        });
-
-        logMessage("Triggered test notifications", "info");
-      }
-
-      // System destruction
-      function destroyAudioSystem() {
-        if (!isInitialized) {
-          logMessage("Audio system not initialized", "warning");
-          return;
-        }
-
-        if (
-          confirm("Destroy the audio system? This will clean up all resources.")
-        ) {
-          try {
-            if (audioUI) {
-              audioUI.destroy();
-              audioUI = null;
-            }
-
-            if (audioManager) {
-              audioManager.destroy();
-              audioManager = null;
-            }
-
-            isInitialized = false;
-            stopWaveform();
-            logMessage("Audio system destroyed", "success");
-            updateSystemStatus();
-          } catch (error) {
-            logMessage(`Error destroying system: ${error.message}`, "error");
-          }
-        }
-      }
-
-      // UI update functions
-      function updateSystemStatus() {
-        if (!audioManager) {
-          document.getElementById("init-status").textContent =
-            "Not Initialized";
-          document.getElementById("init-status").className =
-            "status-value error";
-          document.getElementById("assets-status").textContent = "0/0";
-          document.getElementById("playing-status").textContent = "None";
-          document.getElementById("context-status").textContent = "Unknown";
-          return;
-        }
-
-        const stats = audioManager.getStats();
-
-        // Initialization status
-        const initStatus = document.getElementById("init-status");
-        initStatus.textContent = stats.isInitialized ? "Initialized" : "Failed";
-        initStatus.className = `status-value ${
-          stats.isInitialized ? "success" : "error"
-        }`;
-
-        // Assets status
-        const total = stats.loadedAssets + stats.failedAssets;
-        document.getElementById(
-          "assets-status"
-        ).textContent = `${stats.loadedAssets}/${total}`;
-
-        // Playing status
-        const playingStatus = document.getElementById("playing-status");
-        if (stats.settings.isMuted) {
-          playingStatus.textContent = "Muted";
-          playingStatus.className = "status-value warning";
-        } else if (stats.currentlyPlaying) {
-          playingStatus.textContent = stats.currentlyPlaying;
-          playingStatus.className = "status-value success";
-        } else {
-          playingStatus.textContent = "None";
-          playingStatus.className = "status-value";
-        }
-
-        // Audio context status
-        const contextStatus = document.getElementById("context-status");
-        contextStatus.textContent = stats.audioContextState;
-        contextStatus.className = `status-value ${
-          stats.audioContextState === "running" ? "success" : ""
-        }`;
-
-        // Update memory usage estimate
-        document.getElementById("memory-usage").textContent = `${Math.floor(
-          total * 50
-        )} KB`;
-        document.getElementById("active-audio").textContent = stats.isPlaying
-          ? "1"
-          : "0";
-      }
-
-      function updateVolumeControls() {
-        if (!audioManager) return;
-
-        const stats = audioManager.getStats();
-
-        // Update sliders
-        document.getElementById("master-volume").value = Math.round(
-          stats.volumes.master * 100
-        );
-        document.getElementById("background-volume").value = Math.round(
-          stats.volumes.background * 100
-        );
-        document.getElementById("sfx-volume").value = Math.round(
-          stats.volumes.sfx * 100
-        );
-
-        // Update displays
-        document.getElementById(
-          "master-volume-display"
-        ).textContent = `${Math.round(stats.volumes.master * 100)}%`;
-        document.getElementById(
-          "background-volume-display"
-        ).textContent = `${Math.round(stats.volumes.background * 100)}%`;
-        document.getElementById(
-          "sfx-volume-display"
-        ).textContent = `${Math.round(stats.volumes.sfx * 100)}%`;
-
-        // Update toggle buttons
-        document.getElementById("mute-button").textContent = stats.settings
-          .isMuted
-          ? "🔇 Unmute"
-          : "🔊 Mute";
-        document.getElementById("bg-button").textContent = stats.settings
-          .backgroundMusicEnabled
-          ? "🎵 BG Music"
-          : "🚫 BG Music";
-        document.getElementById("sfx-button").textContent = stats.settings
-          .sfxEnabled
-          ? "🔊 Sound Effects"
-          : "🚫 Sound Effects";
-      }
-
-      function updateBrowserInfo() {
-        const userAgent = navigator.userAgent;
-        let browser = "Unknown";
-
-        if (userAgent.includes("Chrome")) browser = "Chrome";
-        else if (userAgent.includes("Firefox")) browser = "Firefox";
-        else if (userAgent.includes("Safari")) browser = "Safari";
-        else if (userAgent.includes("Edge")) browser = "Edge";
-
-        document.getElementById("browser-info").textContent = browser;
-      }
-
-      // Visual effects
-      function setupWaveform() {
-        const waveform = document.getElementById("audio-waveform");
-        const barCount = 50;
-
-        for (let i = 0; i < barCount; i++) {
-          const bar = document.createElement("div");
-          bar.className = "waveform-bar";
-          bar.style.left = `${(i / barCount) * 100}%`;
-          bar.style.height = "2px";
-          waveform.appendChild(bar);
-        }
-      }
-
-      function simulateWaveform() {
-        if (waveformInterval) clearInterval(waveformInterval);
-
-        waveformInterval = setInterval(() => {
-          const bars = document.querySelectorAll(".waveform-bar");
-          bars.forEach((bar) => {
-            const height = Math.random() * 60 + 5;
-            bar.style.height = `${height}px`;
-          });
-        }, 100);
-      }
-
-      function flashWaveform() {
-        const bars = document.querySelectorAll(".waveform-bar");
-        bars.forEach((bar, index) => {
-          setTimeout(() => {
-            const height = Math.random() * 40 + 10;
-            bar.style.height = `${height}px`;
-            setTimeout(() => {
-              bar.style.height = "2px";
-            }, 200);
-          }, index * 10);
-        });
-      }
-
-      function stopWaveform() {
-        if (waveformInterval) {
-          clearInterval(waveformInterval);
-          waveformInterval = null;
-        }
-
-        const bars = document.querySelectorAll(".waveform-bar");
-        bars.forEach((bar) => {
-          bar.style.height = "2px";
-        });
-      }
-
-      // Utility functions
-      function showLoadingIndicator() {
-        const indicator = document.createElement("span");
-        indicator.className = "loading-indicator";
-        indicator.id = "loading-indicator";
-        document.querySelector("h2").appendChild(indicator);
-      }
-
-      function hideLoadingIndicator() {
-        const indicator = document.getElementById("loading-indicator");
-        if (indicator) {
-          indicator.remove();
-        }
-      }
-
-      function startStatusUpdates() {
-        statusUpdateInterval = setInterval(() => {
-          updateSystemStatus();
-        }, 2000);
-      }
-
-      function logMessage(message, type = "info") {
-        const log = document.getElementById("debug-log");
+      function log(message, type = "info") {
+        const logDiv = document.getElementById("log");
         const entry = document.createElement("div");
-        entry.className = `log-entry ${type}`;
+        entry.className = type;
         entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        log.appendChild(entry);
-        log.scrollTop = log.scrollHeight;
+        logDiv.appendChild(entry);
+        logDiv.scrollTop = logDiv.scrollHeight;
 
-        // Keep only last 100 messages
-        while (log.children.length > 100) {
-          log.removeChild(log.firstChild);
+        // Keep only last 20 messages
+        while (logDiv.children.length > 20) {
+          logDiv.removeChild(logDiv.firstChild);
         }
       }
-
-      function clearLog() {
-        document.getElementById("debug-log").innerHTML = "";
-        logMessage("Debug log cleared", "info");
-      }
-
-      // Cleanup on page unload
-      window.addEventListener("beforeunload", () => {
-        if (statusUpdateInterval) clearInterval(statusUpdateInterval);
-        if (waveformInterval) clearInterval(waveformInterval);
-        if (audioUI) audioUI.destroy();
-        if (audioManager) audioManager.destroy();
-      });
     </script>
   </body>
 </html>

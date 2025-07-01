@@ -355,13 +355,7 @@
   }
 }
 
-/* Quick Actions */
-.audio-quick-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-}
-
+/* Action Buttons */
 .audio-action-button {
   padding: 12px 16px;
   border: none;
@@ -374,6 +368,8 @@
   transition: all var(--audio-transition-speed) ease;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  margin: 5px 0;
 }
 
 .audio-action-button::before {
@@ -407,136 +403,13 @@
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 }
 
+.audio-action-button.full-width {
+  width: 100%;
+}
+
 .audio-action-button:focus {
   outline: 2px solid var(--audio-secondary-color);
   outline-offset: 2px;
-}
-
-/* Status Display */
-.audio-status-display {
-  background: var(--audio-background-accent);
-  padding: 15px;
-  border-radius: var(--audio-border-radius);
-  border: 1px solid var(--audio-border-color);
-}
-
-.audio-status-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.audio-status-item:last-child {
-  margin-bottom: 0;
-  border-bottom: none;
-}
-
-.audio-status-label {
-  font-weight: bold;
-  color: var(--audio-text-secondary);
-  font-size: 14px;
-}
-
-.audio-status-value {
-  font-weight: bold;
-  color: var(--audio-text-primary);
-  font-size: 14px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  transition: all var(--audio-transition-speed) ease;
-}
-
-/* Advanced Settings */
-.audio-advanced-toggle {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--audio-background-accent);
-  border: 1px solid var(--audio-border-color);
-  border-radius: var(--audio-border-radius);
-  padding: 15px;
-  color: var(--audio-text-primary);
-  font-weight: bold;
-  cursor: pointer;
-  transition: all var(--audio-transition-speed) ease;
-  font-size: 16px;
-}
-
-.audio-advanced-toggle:hover {
-  background: var(--audio-primary-color);
-  transform: translateY(-1px);
-}
-
-.audio-advanced-toggle:focus {
-  outline: 2px solid var(--audio-secondary-color);
-  outline-offset: 2px;
-}
-
-.audio-advanced-arrow {
-  font-size: 12px;
-  transition: transform var(--audio-transition-speed) ease;
-}
-
-.audio-advanced-content {
-  margin-top: 15px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--audio-border-radius);
-  border: 1px solid var(--audio-border-color);
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.audio-advanced-item {
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.audio-advanced-item:last-child {
-  margin-bottom: 0;
-}
-
-.audio-advanced-item label {
-  min-width: 120px;
-  font-weight: bold;
-  color: var(--audio-text-secondary);
-  font-size: 14px;
-}
-
-.audio-advanced-item input[type="range"] {
-  flex: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-  outline: none;
-}
-
-.audio-fade-duration-value {
-  min-width: 70px;
-  text-align: center;
-  font-weight: bold;
-  color: var(--audio-text-primary);
-  background: rgba(255, 255, 255, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
 }
 
 /* Settings Footer */
@@ -624,10 +497,6 @@
     width: 100%;
   }
 
-  .audio-quick-actions {
-    grid-template-columns: 1fr;
-  }
-
   .audio-floating-button {
     width: 45px;
     height: 45px;
@@ -657,16 +526,6 @@
   .audio-action-button {
     padding: 10px 12px;
     font-size: 12px;
-  }
-
-  .audio-advanced-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .audio-advanced-item label {
-    min-width: auto;
   }
 }
 

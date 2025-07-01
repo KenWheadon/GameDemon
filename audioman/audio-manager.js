@@ -43,13 +43,13 @@ class AudioManager {
     // Audio file definitions - can be overridden
     this.audioFiles = {
       backgroundMusic: {
-        level1: "audio/music/level1_background.mp3",
-        menu: "audio/music/menu_background.mp3",
-        victory: "audio/music/victory.mp3",
-        defeat: "audio/music/defeat.mp3",
+        level1: "level1_background.mp3",
+        menu: "menu_background.mp3",
+        victory: "victory.mp3",
+        defeat: "defeat.mp3",
       },
       soundEffects: {
-        click: "audio/effects/ui_click.mp3",
+        click: "click.mp3",
         hover: "audio/effects/ui_hover.mp3",
         achievement: "audio/effects/achievement.mp3",
         error: "audio/effects/error.mp3",

@@ -160,61 +160,10 @@ class AudioManagerUI {
             </div>
           </div>
 
-          <!-- Quick Actions Section -->
+          <!-- Reset Settings -->
           <div class="audio-setting-group">
-            <label>Quick Actions</label>
-            <div class="audio-quick-actions">
-              <button class="audio-action-button" id="audio-test-sound" 
-                      aria-label="Test sound effects">🔊 Test Sound</button>
-              <button class="audio-action-button" id="audio-test-music" 
-                      aria-label="Test background music">🎵 Test Music</button>
-              <button class="audio-action-button danger" id="audio-reset-settings" 
-                      aria-label="Reset all audio settings">🔄 Reset All</button>
-            </div>
-          </div>
-
-          <!-- Audio Status Section -->
-          <div class="audio-setting-group">
-            <label>Audio Status</label>
-            <div class="audio-status-display">
-              <div class="audio-status-item">
-                <span class="audio-status-label">Assets Loaded:</span>
-                <span class="audio-status-value" id="audio-status-assets">0/0</span>
-              </div>
-              <div class="audio-status-item">
-                <span class="audio-status-label">Background Music:</span>
-                <span class="audio-status-value" id="audio-status-background">Ready</span>
-              </div>
-              <div class="audio-status-item">
-                <span class="audio-status-label">Sound Effects:</span>
-                <span class="audio-status-value" id="audio-status-sfx">Ready</span>
-              </div>
-              <div class="audio-status-item">
-                <span class="audio-status-label">Audio Context:</span>
-                <span class="audio-status-value" id="audio-status-context">Unknown</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Advanced Settings (Collapsible) -->
-          <div class="audio-setting-group">
-            <label>
-              <button class="audio-advanced-toggle" id="audio-advanced-toggle" 
-                      aria-expanded="false" aria-controls="audio-advanced-content">
-                ⚙️ Advanced Settings <span class="audio-advanced-arrow">▼</span>
-              </button>
-            </label>
-            <div class="audio-advanced-content" id="audio-advanced-content" style="display: none;">
-              <div class="audio-advanced-item">
-                <label for="audio-fade-duration">Fade Duration (ms)</label>
-                <input type="range" id="audio-fade-duration" min="500" max="5000" value="2000" step="100">
-                <span class="audio-fade-duration-value">2000ms</span>
-              </div>
-              <div class="audio-advanced-item">
-                <button class="audio-action-button" id="audio-preload-all">🔄 Reload All Audio</button>
-                <button class="audio-action-button" id="audio-clear-cache">🗑️ Clear Cache</button>
-              </div>
-            </div>
+            <button class="audio-action-button danger full-width" id="audio-reset-settings" 
+                    aria-label="Reset all audio settings">🔄 Reset All Settings</button>
           </div>
         </div>
 
@@ -360,34 +309,9 @@ class AudioManagerUI {
    * Set up action buttons
    */
   setupActionButtons() {
-    const testSoundButton =
-      this.elements.settingsPanel.querySelector("#audio-test-sound");
-    const testMusicButton =
-      this.elements.settingsPanel.querySelector("#audio-test-music");
     const resetButton = this.elements.settingsPanel.querySelector(
       "#audio-reset-settings"
     );
-    const preloadButton =
-      this.elements.settingsPanel.querySelector("#audio-preload-all");
-    const clearCacheButton =
-      this.elements.settingsPanel.querySelector("#audio-clear-cache");
-
-    // Test sound effect
-    testSoundButton.addEventListener("click", () => {
-      this.audioManager.playSoundEffect("achievement", 1.0);
-      this.showNotification("Playing test sound effect");
-    });
-
-    // Test background music
-    testMusicButton.addEventListener("click", () => {
-      if (this.audioManager.currentTrackKey) {
-        this.audioManager.stopBackgroundMusic(true);
-        this.showNotification("Stopped background music");
-      } else {
-        this.audioManager.playBackgroundMusic("menu", true);
-        this.showNotification("Playing test background music");
-      }
-    });
 
     // Reset all settings
     resetButton.addEventListener("click", () => {
@@ -397,68 +321,14 @@ class AudioManagerUI {
         this.showNotification("Audio settings reset to defaults");
       }
     });
-
-    // Reload all audio assets
-    preloadButton.addEventListener("click", async () => {
-      this.showNotification("Reloading audio assets...");
-      try {
-        const results = await this.audioManager.preloadAllAudio();
-        this.showNotification(
-          `Reloaded ${results.successful}/${results.total} audio assets`
-        );
-      } catch (error) {
-        this.showNotification("Failed to reload audio assets", "error");
-      }
-    });
-
-    // Clear audio cache
-    clearCacheButton.addEventListener("click", () => {
-      if (
-        confirm(
-          "Clear audio cache? This will require reloading all audio assets."
-        )
-      ) {
-        // This would be implemented based on your caching strategy
-        this.showNotification("Audio cache cleared");
-      }
-    });
   }
 
   /**
    * Set up advanced settings controls
    */
   setupAdvancedSettings() {
-    const advancedToggle = this.elements.settingsPanel.querySelector(
-      "#audio-advanced-toggle"
-    );
-    const advancedContent = this.elements.settingsPanel.querySelector(
-      "#audio-advanced-content"
-    );
-    const fadeDurationSlider = this.elements.settingsPanel.querySelector(
-      "#audio-fade-duration"
-    );
-    const fadeDurationValue = this.elements.settingsPanel.querySelector(
-      ".audio-fade-duration-value"
-    );
-
-    // Advanced settings toggle
-    advancedToggle.addEventListener("click", () => {
-      const isExpanded =
-        advancedToggle.getAttribute("aria-expanded") === "true";
-      const newState = !isExpanded;
-
-      advancedToggle.setAttribute("aria-expanded", newState.toString());
-      advancedContent.style.display = newState ? "block" : "none";
-      advancedToggle.querySelector(".audio-advanced-arrow").textContent =
-        newState ? "▲" : "▼";
-    });
-
-    // Fade duration slider
-    fadeDurationSlider.addEventListener("input", (e) => {
-      const value = parseInt(e.target.value);
-      fadeDurationValue.textContent = `${value}ms`;
-      this.audioManager.options.fadeTransitionDuration = value;
-    });
+    // Advanced settings removed for game-ready version
+    // Settings are now managed through the core AudioManager options
   }
 
   /**
@@ -619,20 +489,6 @@ class AudioManagerUI {
     );
     this.updateToggleButton(sfxButton, stats.settings.sfxEnabled);
 
-    // Update advanced settings
-    const fadeDurationSlider = this.elements.settingsPanel.querySelector(
-      "#audio-fade-duration"
-    );
-    const fadeDurationValue = this.elements.settingsPanel.querySelector(
-      ".audio-fade-duration-value"
-    );
-
-    if (fadeDurationSlider && fadeDurationValue) {
-      fadeDurationSlider.value =
-        this.audioManager.options.fadeTransitionDuration;
-      fadeDurationValue.textContent = `${this.audioManager.options.fadeTransitionDuration}ms`;
-    }
-
     // Update floating button state
     this.updateFloatingButtonState();
   }
@@ -701,81 +557,9 @@ class AudioManagerUI {
     }
 
     this.updateTimer = setInterval(() => {
-      if (this.isOpen) {
-        this.updateAudioStatus();
-      }
+      // Only update floating button state for game-ready version
       this.updateFloatingButtonState();
     }, this.options.updateInterval);
-  }
-
-  /**
-   * Update audio status display
-   */
-  updateAudioStatus() {
-    const stats = this.audioManager.getStats();
-
-    // Assets status
-    const assetsStatus = this.elements.settingsPanel.querySelector(
-      "#audio-status-assets"
-    );
-    if (assetsStatus) {
-      const total = stats.loadedAssets + stats.failedAssets;
-      assetsStatus.textContent = `${stats.loadedAssets}/${total}`;
-      assetsStatus.style.color = stats.failedAssets > 0 ? "#f39c12" : "#27ae60";
-    }
-
-    // Background music status
-    const backgroundStatus = this.elements.settingsPanel.querySelector(
-      "#audio-status-background"
-    );
-    if (backgroundStatus) {
-      if (stats.settings.isMuted) {
-        backgroundStatus.textContent = "Muted";
-        backgroundStatus.style.color = "#e74c3c";
-      } else if (!stats.settings.backgroundMusicEnabled) {
-        backgroundStatus.textContent = "Disabled";
-        backgroundStatus.style.color = "#f39c12";
-      } else if (stats.isPlaying) {
-        backgroundStatus.textContent = `Playing: ${
-          stats.currentlyPlaying || "Unknown"
-        }`;
-        backgroundStatus.style.color = "#27ae60";
-      } else {
-        backgroundStatus.textContent = "Ready";
-        backgroundStatus.style.color = "#3498db";
-      }
-    }
-
-    // Sound effects status
-    const sfxStatus =
-      this.elements.settingsPanel.querySelector("#audio-status-sfx");
-    if (sfxStatus) {
-      if (stats.settings.isMuted) {
-        sfxStatus.textContent = "Muted";
-        sfxStatus.style.color = "#e74c3c";
-      } else if (!stats.settings.sfxEnabled) {
-        sfxStatus.textContent = "Disabled";
-        sfxStatus.style.color = "#f39c12";
-      } else {
-        sfxStatus.textContent = `Ready (${stats.soundEffects} loaded)`;
-        sfxStatus.style.color = "#27ae60";
-      }
-    }
-
-    // Audio context status
-    const contextStatus = this.elements.settingsPanel.querySelector(
-      "#audio-status-context"
-    );
-    if (contextStatus) {
-      if (!stats.audioContextSupported) {
-        contextStatus.textContent = "Not Supported";
-        contextStatus.style.color = "#f39c12";
-      } else {
-        contextStatus.textContent = stats.audioContextState;
-        contextStatus.style.color =
-          stats.audioContextState === "running" ? "#27ae60" : "#3498db";
-      }
-    }
   }
 
   /**
