@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GameState Quick Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .test-container {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .test-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .test-description {
+        color: #666;
+        margin-bottom: 15px;
+        font-size: 14px;
+      }
+
+      .test-result {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: monospace;
+        margin-top: 10px;
+        white-space: pre-wrap;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .success {
+        color: green;
+      }
+
+      .failure {
+        color: red;
+      }
+
+      button {
+        background: #4a90e2;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #3a80d2;
+      }
+
+      .test-action {
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>GameState Quick Test</h1>
+
+    <div class="test-container">
+      <div class="test-title">1. Basic Get/Set Test</div>
+      <div class="test-description">
+        Tests setting and retrieving a simple value
+      </div>
+
+      <div class="test-action">
+        <button onclick="runBasicTest()">Run Test</button>
+      </div>
+
+      <div class="test-result" id="basic-result"></div>
+    </div>
+
+    <div class="test-container">
+      <div class="test-title">2. Nested Property Test</div>
+      <div class="test-description">
+        Tests accessing nested properties with dot notation
+      </div>
+
+      <div class="test-action">
+        <button onclick="runNestedTest()">Run Test</button>
+      </div>
+
+      <div class="test-result" id="nested-result"></div>
+    </div>
+
+    <div class="test-container">
+      <div class="test-title">3. Watcher Test</div>
+      <div class="test-description">Tests watching for state changes</div>
+
+      <div class="test-action">
+        <button onclick="runWatcherTest()">Run Test</button>
+      </div>
+
+      <div class="test-result" id="watcher-result"></div>
+    </div>
+
+    <div class="test-container">
+      <div class="test-title">4. Save/Load Test</div>
+      <div class="test-description">
+        Tests saving and loading from localStorage
+      </div>
+
+      <div class="test-action">
+        <button onclick="runSaveLoadTest()">Run Test</button>
+      </div>
+
+      <div class="test-result" id="save-load-result"></div>
+    </div>
+
+    <div class="test-container">
+      <div class="test-title">5. Utility Methods Test</div>
+      <div class="test-description">
+        Tests increment, toggle and array operations
+      </div>
+
+      <div class="test-action">
+        <button onclick="runUtilityTest()">Run Test</button>
+      </div>
+
+      <div class="test-result" id="utility-result"></div>
+    </div>
+
+    <div class="test-container">
+      <div class="test-title">Run All Tests</div>
+      <div class="test-description">Runs all the tests in sequence</div>
+
+      <div class="test-action">
+        <button onclick="runAllTests()">Run All Tests</button>
+      </div>
+    </div>
+
+    <!-- Include GameState.js -->
+    <script src="GameState.js"></script>
+
+    <script>
+      // Helper functions
+      function displayResult(elementId, message, success = true) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.innerHTML += `<div class="${
+            success ? "success" : "failure"
+          }">${message}</div>`;
+        }
+      }
+
+      function clearResults(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.innerHTML = "";
+        }
+      }
+
+      function assert(condition, message, elementId) {
+        if (condition) {
+          displayResult(elementId, `✓ PASS: ${message}`, true);
+          return true;
+        } else {
+          displayResult(elementId, `✗ FAIL: ${message}`, false);
+          return false;
+        }
+      }
+
+      // Test functions
+      function runBasicTest() {
+        clearResults("basic-result");
+        displayResult("basic-result", "Running basic get/set test...");
+
+        try {
+          // Initialize with a unique key for this test
+          const state = new GameState({ storageKey: "quicktest-basic" });
+
+          // Test setting a value
+          state.set("testKey", "Hello World");
+          const value = state.get("testKey");
+
+          assert(
+            value === "Hello World",
+            `Expected 'Hello World', got '${value}'`,
+            "basic-result"
+          );
+
+          // Test checking if a key exists
+          const hasKey = state.has("testKey");
+          const doesntHaveKey = state.has("nonExistentKey");
+
+          assert(
+            hasKey === true,
+            `Expected has('testKey') to be true`,
+            "basic-result"
+          );
+
+          assert(
+            doesntHaveKey === false,
+            `Expected has('nonExistentKey') to be false`,
+            "basic-result"
+          );
+
+          // Test deleting a key
+          state.delete("testKey");
+          const afterDelete = state.has("testKey");
+
+          assert(
+            afterDelete === false,
+            `Expected key to be deleted`,
+            "basic-result"
+          );
+
+          displayResult("basic-result", "Basic get/set test completed!");
+        } catch (error) {
+          displayResult("basic-result", `Error: ${error.message}`, false);
+        }
+      }
+
+      function runNestedTest() {
+        clearResults("nested-result");
+        displayResult("nested-result", "Running nested property test...");
+
+        try {
+          // Initialize with a unique key for this test
+          const state = new GameState({ storageKey: "quicktest-nested" });
+
+          // Set up a nested object
+          state.set("player", {
+            stats: {
+              health: 100,
+              strength: 10,
+            },
+            inventory: ["sword", "shield"],
+          });
+
+          // Test accessing nested properties
+          const health = state.get("player.stats.health");
+          assert(
+            health === 100,
+            `Expected health to be 100, got ${health}`,
+            "nested-result"
+          );
+
+          // Test modifying nested properties
+          state.set("player.stats.health", 80);
+          const newHealth = state.get("player.stats.health");
+          assert(
+            newHealth === 80,
+            `Expected health to be 80 after update, got ${newHealth}`,
+            "nested-result"
+          );
+
+          // Test accessing array items
+          const firstItem = state.get("player.inventory.0");
+          assert(
+            firstItem === "sword",
+            `Expected first inventory item to be 'sword', got '${firstItem}'`,
+            "nested-result"
+          );
+
+          // Test non-existent nested path
+          const defaultValue = "default";
+          const nonExistent = state.get(
+            "player.nonexistent.path",
+            defaultValue
+          );
+          assert(
+            nonExistent === defaultValue,
+            `Expected default value for non-existent path`,
+            "nested-result"
+          );
+
+          displayResult("nested-result", "Nested property test completed!");
+        } catch (error) {
+          displayResult("nested-result", `Error: ${error.message}`, false);
+        }
+      }
+
+      function runWatcherTest() {
+        clearResults("watcher-result");
+        displayResult("watcher-result", "Running watcher test...");
+
+        try {
+          // Initialize with a unique key for this test
+          const state = new GameState({ storageKey: "quicktest-watcher" });
+
+          // Set initial value
+          state.set("counter", 0);
+
+          // Set up a watcher
+          let watcherCalled = false;
+          let oldValueFromWatcher = null;
+          let newValueFromWatcher = null;
+
+          const unwatch = state.watch("counter", (newValue, oldValue) => {
+            watcherCalled = true;
+            oldValueFromWatcher = oldValue;
+            newValueFromWatcher = newValue;
+          });
+
+          // Modify the value
+          state.set("counter", 5);
+
+          // Check if watcher was called
+          assert(
+            watcherCalled === true,
+            `Expected watcher to be called`,
+            "watcher-result"
+          );
+
+          assert(
+            oldValueFromWatcher === 0,
+            `Expected old value to be 0, got ${oldValueFromWatcher}`,
+            "watcher-result"
+          );
+
+          assert(
+            newValueFromWatcher === 5,
+            `Expected new value to be 5, got ${newValueFromWatcher}`,
+            "watcher-result"
+          );
+
+          // Test unwatch
+          watcherCalled = false;
+          unwatch(); // Remove the watcher
+
+          // Modify again
+          state.set("counter", 10);
+
+          // Watcher should not be called
+          assert(
+            watcherCalled === false,
+            `Expected watcher not to be called after unwatch`,
+            "watcher-result"
+          );
+
+          displayResult("watcher-result", "Watcher test completed!");
+        } catch (error) {
+          displayResult("watcher-result", `Error: ${error.message}`, false);
+        }
+      }
+
+      function runSaveLoadTest() {
+        clearResults("save-load-result");
+        displayResult("save-load-result", "Running save/load test...");
+
+        try {
+          // Create unique test key
+          const testKey = "quicktest-saveload-" + Date.now();
+
+          // Initialize first instance
+          const state1 = new GameState({ storageKey: testKey });
+
+          // Set some test data
+          state1.set("testData", {
+            timestamp: Date.now(),
+            randomValue: Math.random(),
+          });
+
+          // Save the state
+          const saveResult = state1.saveState();
+          assert(
+            saveResult === true,
+            `Expected save to succeed`,
+            "save-load-result"
+          );
+
+          // Get the saved value for comparison
+          const originalValue = state1.get("testData");
+
+          // Create a second instance with the same key
+          const state2 = new GameState({ storageKey: testKey });
+
+          // Load the state
+          const loadResult = state2.loadState();
+          assert(
+            loadResult === true,
+            `Expected load to succeed`,
+            "save-load-result"
+          );
+
+          // Get the loaded value
+          const loadedValue = state2.get("testData");
+
+          // Compare values
+          const originalJson = JSON.stringify(originalValue);
+          const loadedJson = JSON.stringify(loadedValue);
+
+          assert(
+            originalJson === loadedJson,
+            `Expected loaded value to match original value`,
+            "save-load-result"
+          );
+
+          displayResult("save-load-result", "Save/load test completed!");
+        } catch (error) {
+          displayResult("save-load-result", `Error: ${error.message}`, false);
+        }
+      }
+
+      function runUtilityTest() {
+        clearResults("utility-result");
+        displayResult("utility-result", "Running utility methods test...");
+
+        try {
+          // Initialize with a unique key for this test
+          const state = new GameState({ storageKey: "quicktest-utility" });
+
+          // Test increment
+          state.set("counter", 5);
+          state.increment("counter", 3);
+
+          const incrementResult = state.get("counter");
+          assert(
+            incrementResult === 8,
+            `Expected increment result to be 8, got ${incrementResult}`,
+            "utility-result"
+          );
+
+          // Test decrement
+          state.decrement("counter", 2);
+
+          const decrementResult = state.get("counter");
+          assert(
+            decrementResult === 6,
+            `Expected decrement result to be 6, got ${decrementResult}`,
+            "utility-result"
+          );
+
+          // Test toggle
+          state.set("flag", false);
+          state.toggle("flag");
+
+          const toggleResult = state.get("flag");
+          assert(
+            toggleResult === true,
+            `Expected toggle to flip false to true`,
+            "utility-result"
+          );
+
+          // Test array operations
+          state.set("items", ["a", "b"]);
+
+          // Test addToArray
+          state.addToArray("items", "c");
+          const addResult = state.get("items");
+
+          assert(
+            addResult.length === 3,
+            `Expected array length to be 3 after add, got ${addResult.length}`,
+            "utility-result"
+          );
+
+          assert(
+            addResult[2] === "c",
+            `Expected last item to be 'c', got '${addResult[2]}'`,
+            "utility-result"
+          );
+
+          // Test addToArray with unique
+          state.addToArray("items", "c", true); // Should not add duplicate
+          const uniqueResult = state.get("items");
+
+          assert(
+            uniqueResult.length === 3,
+            `Expected array length to remain 3 after adding duplicate with unique flag`,
+            "utility-result"
+          );
+
+          // Test removeFromArray
+          state.removeFromArray("items", "b");
+          const removeResult = state.get("items");
+
+          assert(
+            removeResult.length === 2,
+            `Expected array length to be 2 after remove, got ${removeResult.length}`,
+            "utility-result"
+          );
+
+          assert(
+            removeResult[0] === "a" && removeResult[1] === "c",
+            `Expected array to be ['a', 'c'] after remove`,
+            "utility-result"
+          );
+
+          displayResult("utility-result", "Utility methods test completed!");
+        } catch (error) {
+          displayResult("utility-result", `Error: ${error.message}`, false);
+        }
+      }
+
+      function runAllTests() {
+        runBasicTest();
+        runNestedTest();
+        runWatcherTest();
+        runSaveLoadTest();
+        runUtilityTest();
+      }
+    </script>
+  </body>
+</html>

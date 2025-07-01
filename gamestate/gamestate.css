@@ -1,0 +1,538 @@
+/* GameState Management CSS - UI Components and Developer Tools */
+
+/* CSS Variables for easy theming */
+:root {
+  --gamestate-primary-color: #3498db;
+  --gamestate-secondary-color: #2ecc71;
+  --gamestate-danger-color: #e74c3c;
+  --gamestate-warning-color: #f39c12;
+  --gamestate-success-color: #27ae60;
+  --gamestate-info-color: #17a2b8;
+
+  --gamestate-background-primary: rgba(44, 62, 80, 0.95);
+  --gamestate-background-secondary: rgba(52, 73, 94, 0.9);
+  --gamestate-background-accent: rgba(255, 255, 255, 0.1);
+
+  --gamestate-text-primary: #ffffff;
+  --gamestate-text-secondary: #bdc3c7;
+  --gamestate-text-muted: #95a5a6;
+
+  --gamestate-border-color: rgba(255, 255, 255, 0.2);
+  --gamestate-shadow-color: rgba(0, 0, 0, 0.3);
+
+  --gamestate-transition-speed: 0.3s;
+  --gamestate-border-radius: 8px;
+  --gamestate-z-index-base: 1000;
+}
+
+/* State Inspector Panel (Developer Tool) */
+.gamestate-inspector {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 400px;
+  max-height: 80vh;
+  background: var(--gamestate-background-primary);
+  border: 1px solid var(--gamestate-border-color);
+  border-radius: var(--gamestate-border-radius);
+  box-shadow: 0 10px 30px var(--gamestate-shadow-color);
+  backdrop-filter: blur(10px);
+  color: var(--gamestate-text-primary);
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  z-index: var(--gamestate-z-index-base);
+  transform: translateX(100%);
+  transition: transform var(--gamestate-transition-speed) ease;
+  overflow: hidden;
+}
+
+.gamestate-inspector.visible {
+  transform: translateX(0);
+}
+
+.gamestate-inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: var(--gamestate-background-secondary);
+  border-bottom: 1px solid var(--gamestate-border-color);
+}
+
+.gamestate-inspector-title {
+  font-weight: bold;
+  font-size: 14px;
+  color: var(--gamestate-primary-color);
+}
+
+.gamestate-inspector-close {
+  background: transparent;
+  border: none;
+  color: var(--gamestate-text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all var(--gamestate-transition-speed) ease;
+}
+
+.gamestate-inspector-close:hover {
+  background: var(--gamestate-danger-color);
+  color: white;
+}
+
+.gamestate-inspector-content {
+  padding: 15px;
+  max-height: calc(80vh - 60px);
+  overflow-y: auto;
+}
+
+/* State Tree Display */
+.gamestate-tree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gamestate-tree-item {
+  margin: 2px 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--gamestate-transition-speed) ease;
+  position: relative;
+}
+
+.gamestate-tree-item:hover {
+  background: var(--gamestate-background-accent);
+}
+
+.gamestate-tree-item.expandable::before {
+  content: "▶";
+  position: absolute;
+  left: -10px;
+  transition: transform var(--gamestate-transition-speed) ease;
+}
+
+.gamestate-tree-item.expanded::before {
+  transform: rotate(90deg);
+}
+
+.gamestate-tree-item.expanded > .gamestate-tree {
+  display: block;
+}
+
+.gamestate-tree-item .gamestate-tree {
+  display: none;
+  margin-left: 15px;
+  padding-left: 10px;
+  border-left: 1px solid var(--gamestate-border-color);
+}
+
+.gamestate-property {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.gamestate-key {
+  color: var(--gamestate-info-color);
+  font-weight: bold;
+}
+
+.gamestate-value {
+  color: var(--gamestate-text-primary);
+  font-family: inherit;
+}
+
+.gamestate-value.string {
+  color: var(--gamestate-success-color);
+}
+
+.gamestate-value.number {
+  color: var(--gamestate-warning-color);
+}
+
+.gamestate-value.boolean {
+  color: var(--gamestate-primary-color);
+}
+
+.gamestate-value.null {
+  color: var(--gamestate-text-muted);
+  font-style: italic;
+}
+
+/* State Controls */
+.gamestate-controls {
+  display: flex;
+  gap: 8px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.gamestate-btn {
+  background: var(--gamestate-primary-color);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: bold;
+  transition: all var(--gamestate-transition-speed) ease;
+  font-family: inherit;
+}
+
+.gamestate-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.gamestate-btn.success {
+  background: var(--gamestate-success-color);
+}
+
+.gamestate-btn.danger {
+  background: var(--gamestate-danger-color);
+}
+
+.gamestate-btn.warning {
+  background: var(--gamestate-warning-color);
+}
+
+.gamestate-btn:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Metadata Display */
+.gamestate-metadata {
+  margin-top: 15px;
+  padding: 10px;
+  background: var(--gamestate-background-accent);
+  border-radius: var(--gamestate-border-radius);
+  border-left: 4px solid var(--gamestate-info-color);
+}
+
+.gamestate-metadata-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--gamestate-info-color);
+  margin-bottom: 5px;
+}
+
+.gamestate-metadata-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+  font-size: 11px;
+}
+
+.gamestate-metadata-key {
+  color: var(--gamestate-text-secondary);
+}
+
+.gamestate-metadata-value {
+  color: var(--gamestate-text-primary);
+  font-weight: bold;
+}
+
+/* Edit Value Dialog */
+.gamestate-edit-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: calc(var(--gamestate-z-index-base) + 10);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--gamestate-transition-speed) ease;
+}
+
+.gamestate-edit-dialog.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gamestate-edit-container {
+  background: var(--gamestate-background-primary);
+  border-radius: var(--gamestate-border-radius);
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 15px 40px var(--gamestate-shadow-color);
+  transform: scale(0.9);
+  transition: transform var(--gamestate-transition-speed) ease;
+}
+
+.gamestate-edit-dialog.visible .gamestate-edit-container {
+  transform: scale(1);
+}
+
+.gamestate-edit-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: var(--gamestate-primary-color);
+}
+
+.gamestate-edit-path {
+  font-size: 12px;
+  color: var(--gamestate-text-secondary);
+  margin-bottom: 10px;
+  padding: 5px;
+  background: var(--gamestate-background-accent);
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.gamestate-edit-input-group {
+  margin-bottom: 15px;
+}
+
+.gamestate-edit-label {
+  display: block;
+  font-size: 12px;
+  color: var(--gamestate-text-secondary);
+  margin-bottom: 5px;
+}
+
+.gamestate-edit-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--gamestate-background-secondary);
+  border: 1px solid var(--gamestate-border-color);
+  border-radius: 4px;
+  color: var(--gamestate-text-primary);
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+}
+
+.gamestate-edit-input:focus {
+  outline: none;
+  border-color: var(--gamestate-primary-color);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+.gamestate-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Error Message */
+.gamestate-error {
+  padding: 10px;
+  margin: 10px 0;
+  background: rgba(231, 76, 60, 0.2);
+  border-left: 4px solid var(--gamestate-danger-color);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--gamestate-text-primary);
+}
+
+/* History Component */
+.gamestate-history {
+  margin-top: 15px;
+  padding: 10px;
+  background: var(--gamestate-background-accent);
+  border-radius: var(--gamestate-border-radius);
+}
+
+.gamestate-history-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--gamestate-primary-color);
+  margin-bottom: 5px;
+}
+
+.gamestate-history-item {
+  font-size: 11px;
+  padding: 5px;
+  margin: 3px 0;
+  border-radius: 4px;
+  background: var(--gamestate-background-secondary);
+  cursor: pointer;
+  transition: background var(--gamestate-transition-speed) ease;
+}
+
+.gamestate-history-item:hover {
+  background: rgba(52, 152, 219, 0.2);
+}
+
+.gamestate-history-path {
+  color: var(--gamestate-primary-color);
+  font-weight: bold;
+}
+
+.gamestate-history-time {
+  color: var(--gamestate-text-muted);
+  font-size: 10px;
+  float: right;
+}
+
+.gamestate-history-value {
+  color: var(--gamestate-text-secondary);
+  margin-top: 3px;
+  font-style: italic;
+}
+
+/* Toggle Button */
+.gamestate-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: var(--gamestate-primary-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 15px var(--gamestate-shadow-color);
+  z-index: var(--gamestate-z-index-base);
+  transition: all var(--gamestate-transition-speed) ease;
+}
+
+.gamestate-toggle:hover {
+  transform: scale(1.1);
+  background: var(--gamestate-secondary-color);
+}
+
+/* Notification Component */
+.gamestate-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  max-width: 300px;
+  background: var(--gamestate-background-primary);
+  border-radius: var(--gamestate-border-radius);
+  padding: 12px 15px;
+  box-shadow: 0 5px 20px var(--gamestate-shadow-color);
+  color: var(--gamestate-text-primary);
+  transform: translateY(100%);
+  transition: transform var(--gamestate-transition-speed) ease;
+  z-index: var(--gamestate-z-index-base);
+}
+
+.gamestate-notification.visible {
+  transform: translateY(0);
+}
+
+.gamestate-notification-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.gamestate-notification-message {
+  font-size: 12px;
+  color: var(--gamestate-text-secondary);
+}
+
+.gamestate-notification.success {
+  border-left: 4px solid var(--gamestate-success-color);
+}
+
+.gamestate-notification.error {
+  border-left: 4px solid var(--gamestate-danger-color);
+}
+
+.gamestate-notification.warning {
+  border-left: 4px solid var(--gamestate-warning-color);
+}
+
+.gamestate-notification.info {
+  border-left: 4px solid var(--gamestate-info-color);
+}
+
+/* Import/Export Panel */
+.gamestate-import-export {
+  margin-top: 15px;
+  padding: 10px;
+  background: var(--gamestate-background-accent);
+  border-radius: var(--gamestate-border-radius);
+}
+
+.gamestate-import-export-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--gamestate-primary-color);
+  margin-bottom: 5px;
+}
+
+.gamestate-export-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 8px 10px;
+  background: var(--gamestate-background-secondary);
+  border: 1px solid var(--gamestate-border-color);
+  border-radius: 4px;
+  color: var(--gamestate-text-primary);
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .gamestate-inspector {
+    width: calc(100% - 40px);
+    max-height: 70vh;
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    transform: translateY(100%);
+  }
+
+  .gamestate-inspector.visible {
+    transform: translateY(0);
+  }
+
+  .gamestate-toggle {
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .gamestate-inspector,
+  .gamestate-edit-dialog,
+  .gamestate-toggle,
+  .gamestate-notification,
+  .gamestate-tree-item.expandable::before {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --gamestate-border-color: white;
+    --gamestate-text-secondary: white;
+    --gamestate-text-muted: rgba(255, 255, 255, 0.8);
+  }
+
+  .gamestate-tree-item:hover,
+  .gamestate-history-item:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .gamestate-inspector-close:hover {
+    background: black;
+    color: white;
+  }
+}
