@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Achievement System Test Wrapper</title>
+    <link rel="stylesheet" href="achievements.css" />
+    <style>
+      /* Test wrapper specific styles */
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .test-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 20px;
+      }
+
+      .controls-panel {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        height: fit-content;
+      }
+
+      .control-section {
+        margin-bottom: 25px;
+      }
+
+      .control-section h3 {
+        margin: 0 0 15px 0;
+        color: #48dbfb;
+        border-bottom: 2px solid rgba(72, 219, 251, 0.3);
+        padding-bottom: 8px;
+      }
+
+      .control-btn {
+        background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        font-family: inherit;
+      }
+
+      .control-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(72, 219, 251, 0.3);
+      }
+
+      .control-btn.danger {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      }
+
+      .control-btn.success {
+        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+      }
+
+      .stat-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+      }
+
+      .stat-control label {
+        min-width: 100px;
+        font-size: 14px;
+      }
+
+      .stat-control input[type="range"] {
+        flex: 1;
+      }
+
+      .stat-control .stat-value {
+        min-width: 40px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+
+      .achievement-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        overflow: hidden;
+        height: fit-content;
+      }
+
+      .debug-log {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+      }
+
+      .debug-log .log-entry {
+        margin: 2px 0;
+        opacity: 0.8;
+      }
+
+      .debug-log .log-entry.success {
+        color: #00b894;
+      }
+
+      .debug-log .log-entry.error {
+        color: #ff6b6b;
+      }
+
+      .debug-log .log-entry.info {
+        color: #48dbfb;
+      }
+
+      @media (max-width: 768px) {
+        .test-wrapper {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-wrapper">
+      <!-- Main Achievement Display -->
+      <div class="achievement-container" id="achievement-container">
+        <!-- Achievements will be rendered here -->
+      </div>
+
+      <!-- Test Controls Panel -->
+      <div class="controls-panel">
+        <h2>🧪 Test Controls</h2>
+
+        <!-- Quick Actions -->
+        <div class="control-section">
+          <h3>Quick Actions</h3>
+          <button class="control-btn success" onclick="unlockFirstWin()">
+            Unlock First Win
+          </button>
+          <button class="control-btn success" onclick="unlockBossKiller()">
+            Unlock Boss Killer
+          </button>
+          <button class="control-btn success" onclick="triggerSecret()">
+            Trigger Secret
+          </button>
+          <button class="control-btn" onclick="testNotification()">
+            Test Notification
+          </button>
+        </div>
+
+        <!-- Progress Controls -->
+        <div class="control-section">
+          <h3>Progress Tracking</h3>
+
+          <div class="stat-control">
+            <label>Enemies:</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              id="enemy-slider"
+              oninput="updateEnemyProgress(this.value)"
+            />
+            <span class="stat-value" id="enemy-value">0</span>
+          </div>
+
+          <div class="stat-control">
+            <label>Items:</label>
+            <input
+              type="range"
+              min="0"
+              max="50"
+              value="0"
+              id="item-slider"
+              oninput="updateItemProgress(this.value)"
+            />
+            <span class="stat-value" id="item-value">0</span>
+          </div>
+
+          <div class="stat-control">
+            <label>Wins:</label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              value="0"
+              id="win-slider"
+              oninput="updateWinProgress(this.value)"
+            />
+            <span class="stat-value" id="win-value">0</span>
+          </div>
+        </div>
+
+        <!-- Game Events -->
+        <div class="control-section">
+          <h3>Game Events</h3>
+          <button class="control-btn" onclick="triggerLevelComplete()">
+            Level Complete
+          </button>
+          <button class="control-btn" onclick="triggerPerfectRun()">
+            Perfect Run
+          </button>
+          <button class="control-btn" onclick="triggerBossDefeat()">
+            Boss Defeat
+          </button>
+          <button class="control-btn" onclick="triggerSpeedRun()">
+            Speed Run
+          </button>
+        </div>
+
+        <!-- System Controls -->
+        <div class="control-section">
+          <h3>System Controls</h3>
+          <button class="control-btn success" onclick="saveAchievements()">
+            Save Progress
+          </button>
+          <button class="control-btn" onclick="loadAchievements()">
+            Load Progress
+          </button>
+          <button class="control-btn danger" onclick="resetAchievements()">
+            Reset All
+          </button>
+          <button class="control-btn" onclick="showStats()">Show Stats</button>
+        </div>
+
+        <!-- Debug Log -->
+        <div class="control-section">
+          <h3>Debug Log</h3>
+          <div class="debug-log" id="debug-log">
+            <div class="log-entry info">Achievement system initializing...</div>
+          </div>
+          <button
+            class="control-btn"
+            onclick="clearLog()"
+            style="margin-top: 10px"
+          >
+            Clear Log
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include Achievement System Files -->
+    <script src="Achievements.js"></script>
+    <script src="Achievement-Manager.js"></script>
+
+    <script>
+      // Test Achievement Data
+      const TEST_ACHIEVEMENTS = {
+        first_win: {
+          id: "first_win",
+          name: "First Victory",
+          description: "Win your first battle",
+          icon: "🏆",
+          points: 10,
+          hidden: false,
+        },
+        enemy_slayer: {
+          id: "enemy_slayer",
+          name: "Enemy Slayer",
+          description: "Defeat 100 enemies",
+          icon: "⚔️",
+          points: 50,
+          hidden: false,
+          progress: {
+            target: 100,
+            current: 0,
+          },
+        },
+        item_collector: {
+          id: "item_collector",
+          name: "Item Collector",
+          description: "Collect 50 items",
+          icon: "📦",
+          points: 30,
+          hidden: false,
+          progress: {
+            target: 50,
+            current: 0,
+          },
+        },
+        win_streak: {
+          id: "win_streak",
+          name: "Win Streak",
+          description: "Win 10 battles in a row",
+          icon: "🔥",
+          points: 75,
+          hidden: false,
+          progress: {
+            target: 10,
+            current: 0,
+          },
+        },
+        boss_killer: {
+          id: "boss_killer",
+          name: "Boss Killer",
+          description: "Defeat the final boss",
+          icon: "👹",
+          points: 100,
+          hidden: false,
+        },
+        secret_finder: {
+          id: "secret_finder",
+          name: "???",
+          description: "???",
+          icon: "❓",
+          points: 200,
+          hidden: true,
+          hint: "Try clicking the secret button...",
+          revealedName: "Secret Finder",
+          revealedDescription: "Found the hidden secret!",
+        },
+        perfectionist: {
+          id: "perfectionist",
+          name: "Perfectionist",
+          description: "Complete a perfect run",
+          icon: "⭐",
+          points: 150,
+          hidden: false,
+        },
+        speed_runner: {
+          id: "speed_runner",
+          name: "Speed Runner",
+          description: "Complete level in under 30 seconds",
+          icon: "⚡",
+          points: 80,
+          hidden: false,
+        },
+      };
+
+      // Game simulation object
+      const gameSimulation = {
+        stats: {
+          enemiesKilled: 0,
+          itemsCollected: 0,
+          wins: 0,
+          level: 1,
+        },
+      };
+
+      // Achievement system instances
+      let achievementManager;
+
+      // Initialize the achievement system
+      function initializeAchievements() {
+        try {
+          achievementManager = new AchievementManager(gameSimulation, {
+            enableDebugLogs: true,
+            enableAutoCheck: true,
+            checkInterval: 1000,
+          });
+
+          achievementManager.initializeAchievements(
+            "#achievement-container",
+            TEST_ACHIEVEMENTS,
+            {
+              enableNotifications: true,
+              autoSave: false, // Manual save for testing
+            }
+          );
+
+          // Set up custom achievement checkers
+          setupCustomCheckers();
+
+          // Load any saved progress
+          achievementManager.loadAchievements();
+
+          logMessage("Achievement system initialized successfully!", "success");
+        } catch (error) {
+          logMessage(`Initialization failed: ${error.message}`, "error");
+        }
+      }
+
+      // Set up custom achievement logic
+      function setupCustomCheckers() {
+        // Perfectionist achievement - needs perfect stats
+        achievementManager.registerCustomChecker("perfectionist", (stats) => {
+          return stats.lastEvent === "perfectRun" && stats.enemiesKilled >= 50;
+        });
+
+        // Speed runner achievement - event-based
+        achievementManager.registerCustomChecker("speed_runner", (stats) => {
+          return (
+            stats.lastEvent === "speedRun" && stats.lastEventData?.time < 30
+          );
+        });
+      }
+
+      // Quick action functions
+      function unlockFirstWin() {
+        achievementManager.unlockAchievement("first_win");
+        logMessage("Unlocked: First Victory", "success");
+      }
+
+      function unlockBossKiller() {
+        achievementManager.unlockAchievement("boss_killer");
+        logMessage("Unlocked: Boss Killer", "success");
+      }
+
+      function triggerSecret() {
+        achievementManager.unlockAchievement("secret_finder");
+        logMessage("Secret achievement unlocked!", "success");
+      }
+
+      function testNotification() {
+        // Test notification directly
+        const testAchievement = {
+          id: "test",
+          name: "Test Achievement",
+          icon: "🧪",
+          points: 99,
+        };
+        achievementManager.achievements.showNotification(testAchievement);
+        logMessage("Test notification triggered", "info");
+      }
+
+      // Progress update functions
+      function updateEnemyProgress(value) {
+        document.getElementById("enemy-value").textContent = value;
+        gameSimulation.stats.enemiesKilled = parseInt(value);
+        achievementManager.updateGameStat("enemiesKilled", parseInt(value));
+        achievementManager.updateAchievementProgress(
+          "enemy_slayer",
+          parseInt(value)
+        );
+        logMessage(`Enemy progress: ${value}/100`, "info");
+      }
+
+      function updateItemProgress(value) {
+        document.getElementById("item-value").textContent = value;
+        gameSimulation.stats.itemsCollected = parseInt(value);
+        achievementManager.updateGameStat("itemsCollected", parseInt(value));
+        achievementManager.updateAchievementProgress(
+          "item_collector",
+          parseInt(value)
+        );
+        logMessage(`Item progress: ${value}/50`, "info");
+      }
+
+      function updateWinProgress(value) {
+        document.getElementById("win-value").textContent = value;
+        gameSimulation.stats.wins = parseInt(value);
+        achievementManager.updateGameStat("wins", parseInt(value));
+        achievementManager.updateAchievementProgress(
+          "win_streak",
+          parseInt(value)
+        );
+        logMessage(`Win progress: ${value}/10`, "info");
+      }
+
+      // Game event functions
+      function triggerLevelComplete() {
+        achievementManager.onGameEvent("levelComplete", {
+          level: gameSimulation.stats.level,
+          time: Math.floor(Math.random() * 120) + 30,
+          score: Math.floor(Math.random() * 1000) + 500,
+        });
+        gameSimulation.stats.level++;
+        logMessage("Event: Level Complete", "info");
+      }
+
+      function triggerPerfectRun() {
+        achievementManager.onGameEvent("perfectRun", {
+          damage_taken: 0,
+          accuracy: 100,
+        });
+        logMessage("Event: Perfect Run", "info");
+      }
+
+      function triggerBossDefeat() {
+        achievementManager.onGameEvent("bossDefeated", {
+          boss_name: "Test Boss",
+          difficulty: "Hard",
+        });
+        logMessage("Event: Boss Defeated", "info");
+      }
+
+      function triggerSpeedRun() {
+        const time = Math.floor(Math.random() * 60) + 10; // 10-70 seconds
+        achievementManager.onGameEvent("speedRun", { time: time });
+        logMessage(`Event: Speed Run (${time}s)`, "info");
+      }
+
+      // System control functions
+      function saveAchievements() {
+        achievementManager.saveAchievements();
+        logMessage("Progress saved to localStorage", "success");
+      }
+
+      function loadAchievements() {
+        const loaded = achievementManager.loadAchievements();
+        logMessage(`Progress loaded: ${loaded}`, loaded ? "success" : "error");
+      }
+
+      function resetAchievements() {
+        if (confirm("Are you sure you want to reset all achievements?")) {
+          achievementManager.resetAchievements();
+
+          // Reset sliders
+          document.getElementById("enemy-slider").value = 0;
+          document.getElementById("item-slider").value = 0;
+          document.getElementById("win-slider").value = 0;
+          document.getElementById("enemy-value").textContent = 0;
+          document.getElementById("item-value").textContent = 0;
+          document.getElementById("win-value").textContent = 0;
+
+          // Reset game stats
+          gameSimulation.stats = {
+            enemiesKilled: 0,
+            itemsCollected: 0,
+            wins: 0,
+            level: 1,
+          };
+
+          logMessage("All achievements reset", "success");
+        }
+      }
+
+      function showStats() {
+        const stats = achievementManager.getAchievementStats();
+        const message = `Stats: ${stats.unlockedCount}/${stats.totalCount} unlocked, ${stats.totalPoints} points, ${stats.completionPercentage}% complete`;
+        logMessage(message, "info");
+        alert(message);
+      }
+
+      // Debug logging
+      function logMessage(message, type = "info") {
+        const log = document.getElementById("debug-log");
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+
+        // Keep only last 50 messages
+        while (log.children.length > 50) {
+          log.removeChild(log.firstChild);
+        }
+      }
+
+      function clearLog() {
+        document.getElementById("debug-log").innerHTML = "";
+        logMessage("Log cleared", "info");
+      }
+
+      // Initialize when page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        logMessage("Page loaded, initializing achievement system...", "info");
+
+        setTimeout(() => {
+          initializeAchievements();
+        }, 100);
+      });
+
+      // Auto-save every 30 seconds
+      setInterval(() => {
+        if (achievementManager) {
+          achievementManager.saveAchievements();
+          logMessage("Auto-saved progress", "info");
+        }
+      }, 30000);
+    </script>
+  </body>
+</html>
