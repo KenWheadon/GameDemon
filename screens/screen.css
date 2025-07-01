@@ -1,0 +1,712 @@
+/**
+ * screen.css - Complete Screen System Styling
+ * Part of Vanilla JavaScript Game Development Toolkit
+ * 
+ * Comprehensive styling for the Screen system including:
+ * - Responsive layout and positioning
+ * - Smooth animations and transitions
+ * - Multiple screen types (start, end, credits, help, custom)
+ * - Button system with interaction states
+ * - Mobile-responsive design
+ * - Accessibility features
+ * - Performance optimizations
+ * - Dark theme support
+ * 
+ * @author Game Development Toolkit
+ * @version 1.0.0
+ */
+
+/* ==============================================
+   CSS CUSTOM PROPERTIES (VARIABLES)
+   ============================================== */
+
+:root {
+  /* Screen System Colors */
+  --screen-bg-primary: #1a1a2e;
+  --screen-bg-secondary: #16213e;
+  --screen-bg-accent: #0f3460;
+  --screen-overlay: rgba(0, 0, 0, 0.8);
+  
+  /* Text Colors */
+  --screen-text-primary: #ffffff;
+  --screen-text-secondary: #b8b8d1;
+  --screen-text-accent: #4cc9f0;
+  --screen-text-muted: #8892b0;
+  
+  /* Button Colors */
+  --screen-button-bg: #4cc9f0;
+  --screen-button-bg-hover: #52d3ff;
+  --screen-button-bg-active: #39b5db;
+  --screen-button-bg-disabled: #2a4a5c;
+  --screen-button-text: #ffffff;
+  --screen-button-text-disabled: #8892b0;
+  
+  /* Secondary Button Colors */
+  --screen-button-secondary-bg: transparent;
+  --screen-button-secondary-border: #4cc9f0;
+  --screen-button-secondary-text: #4cc9f0;
+  --screen-button-secondary-hover-bg: rgba(76, 201, 240, 0.1);
+  
+  /* Spacing and Sizing */
+  --screen-padding: 2rem;
+  --screen-padding-mobile: 1rem;
+  --screen-gap: 1.5rem;
+  --screen-gap-mobile: 1rem;
+  --screen-border-radius: 12px;
+  --screen-button-height: 48px;
+  --screen-button-padding: 0 2rem;
+  
+  /* Animation Timing */
+  --screen-transition-duration: 300ms;
+  --screen-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --screen-button-transition: all 150ms ease-out;
+  
+  /* Typography */
+  --screen-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --screen-title-size: clamp(2rem, 5vw, 3.5rem);
+  --screen-subtitle-size: clamp(1.25rem, 3vw, 1.5rem);
+  --screen-content-size: 1rem;
+  --screen-button-size: 0.9rem;
+  
+  /* Z-Index Stack */
+  --screen-z-index: 1000;
+  --screen-overlay-z-index: 999;
+}
+
+/* ==============================================
+   SCREEN CONTAINER SYSTEM
+   ============================================== */
+
+.game-screen {
+  /* Positioning */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--screen-z-index);
+  
+  /* Layout */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  
+  /* Styling */
+  background: var(--screen-bg-primary);
+  font-family: var(--screen-font-family);
+  color: var(--screen-text-primary);
+  
+  /* Performance Optimizations */
+  will-change: opacity, transform;
+  contain: layout style paint;
+  
+  /* Accessibility */
+  outline: none;
+  
+  /* Animation Preparation */
+  opacity: 0;
+  transform: scale(0.95);
+  transition: 
+    opacity var(--screen-transition-duration) var(--screen-transition-easing),
+    transform var(--screen-transition-duration) var(--screen-transition-easing);
+}
+
+/* Screen States */
+.game-screen.screen-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.game-screen.screen-entering {
+  display: flex;
+  opacity: 0;
+  transform: scale(0.95);
+  animation: screenFadeIn var(--screen-transition-duration) var(--screen-transition-easing) forwards;
+}
+
+.game-screen.screen-exiting {
+  opacity: 1;
+  transform: scale(1);
+  animation: screenFadeOut var(--screen-transition-duration) var(--screen-transition-easing) forwards;
+}
+
+/* ==============================================
+   SCREEN OVERLAY
+   ============================================== */
+
+.screen-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--screen-overlay);
+  backdrop-filter: blur(2px);
+  z-index: var(--screen-overlay-z-index);
+}
+
+/* ==============================================
+   SCREEN CONTENT LAYOUT
+   ============================================== */
+
+.screen-content {
+  /* Positioning */
+  position: relative;
+  z-index: calc(var(--screen-z-index) + 1);
+  
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--screen-gap);
+  
+  /* Sizing */
+  width: 100%;
+  max-width: 600px;
+  min-height: 50vh;
+  
+  /* Spacing */
+  padding: var(--screen-padding);
+  margin: 0 auto;
+  
+  /* Styling */
+  text-align: center;
+  
+  /* Responsive Design */
+  box-sizing: border-box;
+}
+
+/* ==============================================
+   TYPOGRAPHY STYLES
+   ============================================== */
+
+.screen-title {
+  /* Typography */
+  font-size: var(--screen-title-size);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  
+  /* Colors */
+  color: var(--screen-text-primary);
+  
+  /* Spacing */
+  margin: 0 0 0.5rem 0;
+  
+  /* Animation */
+  animation: screenTitleSlide 0.6s var(--screen-transition-easing) 0.1s both;
+}
+
+.screen-subtitle {
+  /* Typography */
+  font-size: var(--screen-subtitle-size);
+  font-weight: 400;
+  line-height: 1.4;
+  
+  /* Colors */
+  color: var(--screen-text-secondary);
+  
+  /* Spacing */
+  margin: 0 0 1rem 0;
+  
+  /* Animation */
+  animation: screenSubtitleSlide 0.6s var(--screen-transition-easing) 0.2s both;
+}
+
+.screen-main-content {
+  /* Typography */
+  font-size: var(--screen-content-size);
+  line-height: 1.6;
+  
+  /* Colors */
+  color: var(--screen-text-secondary);
+  
+  /* Layout */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+  /* Spacing */
+  margin: 0 0 2rem 0;
+  
+  /* Animation */
+  animation: screenContentFade 0.6s var(--screen-transition-easing) 0.3s both;
+}
+
+.screen-main-content p {
+  margin: 0 0 1rem 0;
+}
+
+.screen-main-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* ==============================================
+   BUTTON SYSTEM
+   ============================================== */
+
+.screen-buttons {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  
+  /* Sizing */
+  width: 100%;
+  max-width: 400px;
+  
+  /* Animation */
+  animation: screenButtonsSlide 0.6s var(--screen-transition-easing) 0.4s both;
+}
+
+.screen-button {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  /* Sizing */
+  width: 100%;
+  min-height: var(--screen-button-height);
+  padding: var(--screen-button-padding);
+  
+  /* Styling */
+  background: var(--screen-button-bg);
+  color: var(--screen-button-text);
+  border: 2px solid transparent;
+  border-radius: var(--screen-border-radius);
+  
+  /* Typography */
+  font-family: inherit;
+  font-size: var(--screen-button-size);
+  font-weight: 600;
+  text-decoration: none;
+  
+  /* Interaction */
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  
+  /* Animation */
+  transition: var(--screen-button-transition);
+  will-change: transform, background-color, border-color;
+  
+  /* Accessibility */
+  outline: none;
+  position: relative;
+}
+
+/* Button Hover State */
+.screen-button:hover:not(:disabled) {
+  background: var(--screen-button-bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(76, 201, 240, 0.3);
+}
+
+/* Button Active State */
+.screen-button:active:not(:disabled),
+.screen-button.screen-button--clicked {
+  background: var(--screen-button-bg-active);
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(76, 201, 240, 0.2);
+}
+
+/* Button Focus State */
+.screen-button:focus-visible {
+  outline: 2px solid var(--screen-text-accent);
+  outline-offset: 2px;
+}
+
+/* Button Disabled State */
+.screen-button:disabled {
+  background: var(--screen-button-bg-disabled);
+  color: var(--screen-button-text-disabled);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ==============================================
+   BUTTON VARIANTS
+   ============================================== */
+
+/* Primary Button (default styling above) */
+.screen-button--primary {
+  /* Enhanced styling for primary actions */
+  box-shadow: 0 4px 15px rgba(76, 201, 240, 0.2);
+}
+
+/* Secondary Button */
+.screen-button--secondary {
+  background: var(--screen-button-secondary-bg);
+  color: var(--screen-button-secondary-text);
+  border-color: var(--screen-button-secondary-border);
+}
+
+.screen-button--secondary:hover:not(:disabled) {
+  background: var(--screen-button-secondary-hover-bg);
+  border-color: var(--screen-button-bg-hover);
+  color: var(--screen-button-bg-hover);
+  box-shadow: 0 8px 25px rgba(76, 201, 240, 0.15);
+}
+
+/* Danger Button */
+.screen-button--danger {
+  --screen-button-bg: #e53e3e;
+  --screen-button-bg-hover: #f56565;
+  --screen-button-bg-active: #c53030;
+}
+
+/* Success Button */
+.screen-button--success {
+  --screen-button-bg: #38a169;
+  --screen-button-bg-hover: #48bb78;
+  --screen-button-bg-active: #2f855a;
+}
+
+/* ==============================================
+   BUTTON CONTENT ELEMENTS
+   ============================================== */
+
+.button-icon {
+  /* Sizing */
+  width: 1.2em;
+  height: 1.2em;
+  
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Animation */
+  transition: transform var(--screen-button-transition);
+}
+
+.screen-button:hover .button-icon {
+  transform: scale(1.1);
+}
+
+.button-text {
+  /* Typography */
+  font-weight: inherit;
+  
+  /* Animation */
+  transition: transform var(--screen-button-transition);
+}
+
+/* ==============================================
+   SCREEN TYPE VARIATIONS
+   ============================================== */
+
+/* Start Screen */
+.game-screen--start {
+  background: linear-gradient(135deg, var(--screen-bg-primary), var(--screen-bg-secondary));
+}
+
+.game-screen--start .screen-title {
+  color: var(--screen-text-accent);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* End Screen */
+.game-screen--end {
+  background: linear-gradient(135deg, #2d1b69, #11998e);
+}
+
+.game-screen--end .screen-title {
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Credits Screen */
+.game-screen--credits {
+  background: linear-gradient(135deg, var(--screen-bg-accent), var(--screen-bg-secondary));
+}
+
+.game-screen--credits .screen-main-content {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+/* Help Screen */
+.game-screen--help {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+}
+
+.game-screen--help .screen-main-content {
+  text-align: left;
+  max-width: 800px;
+}
+
+/* Custom Screen */
+.game-screen--custom {
+  /* Uses default styling - can be customized per instance */
+}
+
+/* Error Screen */
+.game-screen--error {
+  background: linear-gradient(135deg, #7f1d1d, #991b1b);
+}
+
+.game-screen--error .screen-title {
+  color: #fecaca;
+}
+
+/* ==============================================
+   RESPONSIVE DESIGN
+   ============================================== */
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+  :root {
+    --screen-padding: var(--screen-padding-mobile);
+    --screen-gap: var(--screen-gap-mobile);
+    --screen-button-padding: 0 1.5rem;
+  }
+  
+  .screen-content {
+    min-height: 40vh;
+    padding: var(--screen-padding-mobile);
+  }
+  
+  .screen-buttons {
+    max-width: 100%;
+    gap: 0.75rem;
+  }
+  
+  .screen-button {
+    min-height: 44px; /* iOS touch target minimum */
+  }
+  
+  /* Larger buttons on mobile for touch */
+  .screen-main-content {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  .screen-content {
+    padding: 1rem 0.75rem;
+  }
+  
+  .screen-buttons {
+    gap: 0.5rem;
+  }
+}
+
+/* Large Screens */
+@media (min-width: 1200px) {
+  .screen-content {
+    max-width: 800px;
+  }
+  
+  .screen-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 600px;
+  }
+  
+  .screen-button {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 160px;
+  }
+}
+
+/* ==============================================
+   ANIMATION KEYFRAMES
+   ============================================== */
+
+@keyframes screenFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes screenFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+}
+
+@keyframes screenTitleSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes screenSubtitleSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes screenContentFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes screenButtonsSlide {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================== */
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --screen-text-primary: #ffffff;
+    --screen-text-secondary: #ffffff;
+    --screen-button-bg: #0066cc;
+    --screen-button-bg-hover: #0052a3;
+  }
+  
+  .screen-button {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --screen-transition-duration: 0ms;
+  }
+  
+  .game-screen,
+  .screen-button,
+  .button-icon,
+  .button-text {
+    transition: none;
+    animation: none;
+  }
+  
+  .screen-title,
+  .screen-subtitle,
+  .screen-main-content,
+  .screen-buttons {
+    animation: none;
+  }
+}
+
+/* Focus Indicators for Keyboard Navigation */
+.game-screen:focus-within {
+  outline: none;
+}
+
+.screen-button:focus-visible {
+  outline: 3px solid var(--screen-text-accent);
+  outline-offset: 2px;
+}
+
+/* ==============================================
+   UTILITY CLASSES
+   ============================================== */
+
+/* Screen Visibility Utilities */
+.screen-hidden {
+  display: none !important;
+}
+
+.screen-visible {
+  display: flex !important;
+}
+
+/* Button Size Variations */
+.screen-button--small {
+  min-height: 36px;
+  padding: 0 1rem;
+  font-size: 0.8rem;
+}
+
+.screen-button--large {
+  min-height: 56px;
+  padding: 0 2.5rem;
+  font-size: 1.1rem;
+}
+
+/* Text Alignment Utilities */
+.screen-content--left {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.screen-content--right {
+  text-align: right;
+  align-items: flex-end;
+}
+
+/* Spacing Utilities */
+.screen-gap--small {
+  gap: 0.75rem;
+}
+
+.screen-gap--large {
+  gap: 2.5rem;
+}
+
+/* ==============================================
+   DARK THEME ENHANCEMENTS
+   ============================================== */
+
+@media (prefers-color-scheme: dark) {
+  /* Dark theme is default, but can be enhanced here */
+  :root {
+    --screen-overlay: rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* Light Theme Override (if needed) */
+@media (prefers-color-scheme: light) {
+  :root {
+    --screen-bg-primary: #ffffff;
+    --screen-bg-secondary: #f8fafc;
+    --screen-bg-accent: #e2e8f0;
+    --screen-overlay: rgba(255, 255, 255, 0.95);
+    
+    --screen-text-primary: #1a202c;
+    --screen-text-secondary: #4a5568;
+    --screen-text-accent: #2b6cb0;
+    --screen-text-muted: #718096;
+  }
+}

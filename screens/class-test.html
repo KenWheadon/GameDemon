@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screen System Test - Game Development Toolkit</title>
+    <link rel="stylesheet" href="screen.css" />
+    <style>
+      /* Test Environment Specific Styles */
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #0f172a;
+        color: #fff;
+        overflow-x: hidden;
+      }
+
+      .test-controls {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 1rem;
+        z-index: 2000;
+        max-width: 300px;
+        backdrop-filter: blur(10px);
+      }
+
+      .test-controls h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1rem;
+        color: #4cc9f0;
+      }
+
+      .test-button {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+        padding: 0.5rem 1rem;
+        background: #1e293b;
+        color: #fff;
+        border: 1px solid #475569;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+      }
+
+      .test-button:hover {
+        background: #334155;
+        border-color: #4cc9f0;
+      }
+
+      .test-button:active {
+        background: #0f172a;
+      }
+
+      .test-info {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid #22c55e;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        line-height: 1.4;
+      }
+
+      .test-info h4 {
+        margin: 0 0 0.5rem 0;
+        color: #22c55e;
+        font-size: 0.9rem;
+      }
+
+      .test-console {
+        position: fixed;
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+        max-height: 200px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-y: auto;
+        font-family: "Courier New", monospace;
+        font-size: 0.8rem;
+        backdrop-filter: blur(10px);
+        z-index: 1999;
+      }
+
+      .console-entry {
+        margin: 0.25rem 0;
+        padding: 0.25rem;
+        border-radius: 2px;
+      }
+
+      .console-entry.info {
+        color: #4cc9f0;
+      }
+
+      .console-entry.success {
+        color: #22c55e;
+      }
+
+      .console-entry.error {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      .console-entry.warning {
+        color: #f59e0b;
+      }
+
+      /* Mobile adjustments */
+      @media (max-width: 768px) {
+        .test-controls {
+          position: static;
+          max-width: none;
+          margin: 1rem;
+          border-radius: 4px;
+        }
+
+        .test-console {
+          position: static;
+          margin: 1rem;
+          max-height: 150px;
+        }
+      }
+
+      /* Hide test controls when screen is visible */
+      .game-screen.screen-visible ~ .test-controls,
+      .game-screen.screen-visible ~ .test-console {
+        opacity: 0.3;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Test Controls Panel -->
+    <div class="test-controls">
+      <h3>🧪 Screen System Test</h3>
+
+      <button class="test-button" onclick="testStartScreen()">
+        Start Screen
+      </button>
+      <button class="test-button" onclick="testEndScreen()">End Screen</button>
+      <button class="test-button" onclick="testCreditsScreen()">
+        Credits Screen
+      </button>
+      <button class="test-button" onclick="testHelpScreen()">
+        Help Screen
+      </button>
+      <button class="test-button" onclick="testCustomScreen()">
+        Custom Screen
+      </button>
+
+      <hr style="border: 1px solid #334155; margin: 1rem 0" />
+
+      <button class="test-button" onclick="testNavigation()">
+        Navigation Test
+      </button>
+      <button class="test-button" onclick="testAnimations()">
+        Animation Test
+      </button>
+      <button class="test-button" onclick="testStateManagement()">
+        State Test
+      </button>
+      <button class="test-button" onclick="testResponsive()">
+        Responsive Test
+      </button>
+
+      <hr style="border: 1px solid #334155; margin: 1rem 0" />
+
+      <button class="test-button" onclick="clearConsole()">
+        Clear Console
+      </button>
+      <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+
+      <div class="test-info">
+        <h4>💡 Test Instructions</h4>
+        <p>• Click buttons above to test different screens</p>
+        <p>• Use ESC key for navigation</p>
+        <p>• Test on mobile devices</p>
+        <p>• Check console for logs</p>
+      </div>
+    </div>
+
+    <!-- Console Output -->
+    <div class="test-console" id="testConsole">
+      <div class="console-entry info">
+        🚀 Screen System Test Environment Ready
+      </div>
+      <div class="console-entry info">
+        📱 Resize window to test responsive design
+      </div>
+    </div>
+
+    <!-- Include Screen System Files -->
+    <script src="Screen.js"></script>
+    <script src="Screen-Manager.js"></script>
+
+    <script>
+      // Test Environment JavaScript
+      let screenManager;
+      let testResults = {
+        passed: 0,
+        failed: 0,
+        total: 0,
+      };
+
+      // Console logging system
+      function logToConsole(message, type = "info") {
+        const testConsole = document.getElementById("testConsole");
+        const entry = document.createElement("div");
+        entry.className = `console-entry ${type}`;
+        entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+        testConsole.appendChild(entry);
+        testConsole.scrollTop = testConsole.scrollHeight;
+
+        // Also log to browser console
+        if (type === "error") {
+          console.error(message);
+        } else if (type === "warning") {
+          console.warn(message);
+        } else {
+          console.log(message);
+        }
+      }
+
+      function clearConsole() {
+        document.getElementById("testConsole").innerHTML = "";
+        logToConsole("Console cleared", "info");
+      }
+
+      // Initialize Screen Manager with comprehensive test screens
+      function initializeScreenManager() {
+        try {
+          screenManager = new ScreenManager({
+            defaultScreen: "start",
+            enableHistory: true,
+            onScreenChange: (current, previous) => {
+              logToConsole(
+                `Screen changed: ${previous?.id || "none"} → ${current.id}`,
+                "success"
+              );
+            },
+            screens: {
+              start: {
+                type: "start",
+                title: "🎮 Awesome Game",
+                subtitle: "Welcome to the ultimate gaming experience!",
+                content:
+                  "<p>Get ready for an amazing adventure filled with challenges and rewards.</p>",
+                background: {
+                  type: "gradient",
+                  value: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                },
+                buttons: [
+                  {
+                    label: "🚀 Start Game",
+                    primary: true,
+                    callback: () => {
+                      logToConsole("Start Game clicked", "success");
+                      screenManager.showScreen("game-simulation");
+                    },
+                  },
+                  {
+                    label: "❓ Help",
+                    callback: () => screenManager.showScreen("help"),
+                  },
+                  {
+                    label: "🏆 Credits",
+                    callback: () => screenManager.showScreen("credits"),
+                  },
+                ],
+              },
+
+              end: {
+                type: "end",
+                title: "🎉 Congratulations!",
+                subtitle: "You completed the game!",
+                content: `
+                                <div style="text-align: center; margin: 2rem 0;">
+                                    <h3 style="color: #4cc9f0; margin: 1rem 0;">Final Score: 15,750</h3>
+                                    <p>⏱️ Time: 12:34</p>
+                                    <p>💎 Gems Collected: 47/50</p>
+                                    <p>🏅 Achievements Unlocked: 8</p>
+                                    <div style="margin: 1.5rem 0; padding: 1rem; background: rgba(76, 201, 240, 0.1); border-radius: 8px;">
+                                        <strong>🆕 New Personal Best!</strong>
+                                    </div>
+                                </div>
+                            `,
+                buttons: [
+                  {
+                    label: "🔄 Play Again",
+                    primary: true,
+                    callback: () => {
+                      logToConsole("Play Again clicked", "success");
+                      screenManager.showScreen("start");
+                    },
+                  },
+                  {
+                    label: "📊 View Stats",
+                    callback: () => {
+                      logToConsole("View Stats clicked", "info");
+                      alert("Stats feature would open here!");
+                    },
+                  },
+                  {
+                    label: "🏠 Main Menu",
+                    callback: () => screenManager.showScreen("start"),
+                  },
+                ],
+              },
+
+              credits: {
+                type: "credits",
+                title: "🏆 Credits",
+                subtitle: "Made with ❤️ by amazing people",
+                content: `
+                                <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+                                    <h3 style="color: #4cc9f0; margin-top: 2rem;">🎨 Game Design</h3>
+                                    <p>• Creative Director: Alex Johnson<br>
+                                    • Level Designer: Sarah Chen<br>
+                                    • UI/UX Designer: Mike Rodriguez</p>
+
+                                    <h3 style="color: #4cc9f0; margin-top: 2rem;">💻 Development</h3>
+                                    <p>• Lead Developer: Emma Thompson<br>
+                                    • Frontend Engineer: David Kim<br>
+                                    • Backend Engineer: Lisa Wang</p>
+
+                                    <h3 style="color: #4cc9f0; margin-top: 2rem;">🎵 Audio</h3>
+                                    <p>• Sound Designer: Tom Wilson<br>
+                                    • Music Composer: Anna Martinez<br>
+                                    • Voice Acting: Various Artists</p>
+
+                                    <h3 style="color: #4cc9f0; margin-top: 2rem;">🙏 Special Thanks</h3>
+                                    <p>• Our amazing beta testers<br>
+                                    • The open source community<br>
+                                    • Coffee shops that kept us caffeinated</p>
+
+                                    <div style="text-align: center; margin: 2rem 0; padding: 1rem; background: rgba(76, 201, 240, 0.05); border-radius: 8px;">
+                                        <p style="font-style: italic;">Built with Vanilla JavaScript Game Development Toolkit</p>
+                                        <p style="font-size: 0.9rem; color: #8892b0;">Version 1.0.0 • 2024</p>
+                                    </div>
+                                </div>
+                            `,
+                buttons: [
+                  {
+                    label: "🔙 Back",
+                    primary: true,
+                    action: "back",
+                  },
+                  {
+                    label: "🏠 Main Menu",
+                    callback: () => screenManager.showScreen("start"),
+                  },
+                ],
+              },
+
+              help: {
+                type: "help",
+                title: "❓ How to Play",
+                subtitle: "Master the game with these tips",
+                content: `
+                                <div style="text-align: left; max-width: 600px;">
+                                    <h3 style="color: #4cc9f0;">🎮 Basic Controls</h3>
+                                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                                        <li><strong>Arrow Keys</strong> - Move your character</li>
+                                        <li><strong>Spacebar</strong> - Jump or interact</li>
+                                        <li><strong>Enter</strong> - Confirm actions</li>
+                                        <li><strong>ESC</strong> - Pause game or go back</li>
+                                    </ul>
+
+                                    <h3 style="color: #4cc9f0;">🏆 Objectives</h3>
+                                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                                        <li>Collect all gems in each level</li>
+                                        <li>Reach the exit portal safely</li>
+                                        <li>Avoid enemies and obstacles</li>
+                                        <li>Complete levels within time limit</li>
+                                    </ul>
+
+                                    <h3 style="color: #4cc9f0;">💡 Pro Tips</h3>
+                                    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+                                        <li>Double-tap arrow keys to run faster</li>
+                                        <li>Look for hidden passages in walls</li>
+                                        <li>Some gems give special power-ups</li>
+                                        <li>Practice makes perfect!</li>
+                                    </ul>
+
+                                    <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin: 1.5rem 0;">
+                                        <strong style="color: #ffc107;">⚠️ Important:</strong>
+                                        <p style="margin: 0.5rem 0 0 0;">Save your progress frequently! The game auto-saves at checkpoints, but manual saves are recommended before challenging sections.</p>
+                                    </div>
+                                </div>
+                            `,
+                buttons: [
+                  {
+                    label: "🚀 Start Playing",
+                    primary: true,
+                    callback: () => screenManager.showScreen("start"),
+                  },
+                  {
+                    label: "🔙 Back",
+                    action: "back",
+                  },
+                ],
+              },
+
+              custom: {
+                type: "custom",
+                title: "⚙️ Custom Screen Demo",
+                subtitle: "This is a completely customizable screen",
+                content: `
+                                <div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); padding: 2rem; border-radius: 12px; margin: 1rem 0;">
+                                    <h3 style="color: white; margin: 0 0 1rem 0;">🎨 Custom Styling</h3>
+                                    <p style="color: white; margin: 0;">This screen demonstrates custom backgrounds, styling, and content layouts. You can create any type of screen you need!</p>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                                    <div style="text-align: center; padding: 1rem; background: rgba(76, 201, 240, 0.1); border-radius: 8px;">
+                                        <div style="font-size: 2rem;">📊</div>
+                                        <div>Statistics</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 1rem; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+                                        <div style="font-size: 2rem;">⚙️</div>
+                                        <div>Settings</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                                        <div style="font-size: 2rem;">🎮</div>
+                                        <div>Controls</div>
+                                    </div>
+                                </div>
+                            `,
+                background: {
+                  type: "gradient",
+                  value: "linear-gradient(135deg, #2d1b69 0%, #11998e 100%)",
+                },
+                buttons: [
+                  {
+                    label: "✨ Special Action",
+                    primary: true,
+                    class: "screen-button--special",
+                    callback: () => {
+                      logToConsole("Special action triggered!", "success");
+                      alert("🎉 Special action executed!");
+                    },
+                  },
+                  {
+                    label: "📝 Update Content",
+                    callback: () => {
+                      const randomNum = Math.floor(Math.random() * 1000);
+                      screenManager.updateScreen("custom", {
+                        subtitle: `Updated at ${new Date().toLocaleTimeString()} - Random: ${randomNum}`,
+                        content: `<p style="text-align: center; font-size: 1.2rem; color: #4cc9f0;">Content updated dynamically! 🔄</p>`,
+                      });
+                      logToConsole("Custom screen content updated", "info");
+                    },
+                  },
+                  {
+                    label: "🔙 Back",
+                    action: "back",
+                  },
+                ],
+              },
+
+              "game-simulation": {
+                type: "custom",
+                title: "🎮 Game Running...",
+                subtitle: "Simulated gameplay in progress",
+                content: `
+                                <div style="text-align: center; padding: 2rem;">
+                                    <div style="font-size: 4rem; margin: 1rem 0;">🎯</div>
+                                    <p>This would be your actual game interface!</p>
+                                    <div style="background: rgba(76, 201, 240, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                        <div>Score: <span id="simulatedScore">0</span></div>
+                                        <div>Level: <span id="simulatedLevel">1</span></div>
+                                        <div>Time: <span id="simulatedTime">00:00</span></div>
+                                    </div>
+                                </div>
+                            `,
+                buttons: [
+                  {
+                    label: "🏁 Finish Game",
+                    primary: true,
+                    callback: () => {
+                      logToConsole("Game finished", "success");
+                      screenManager.showScreen("end");
+                    },
+                  },
+                  {
+                    label: "⏸️ Pause Menu",
+                    callback: () => {
+                      logToConsole("Game paused", "info");
+                      alert("Pause menu would appear here!");
+                    },
+                  },
+                  {
+                    label: "🚪 Quit Game",
+                    callback: () => {
+                      if (confirm("Are you sure you want to quit?")) {
+                        screenManager.showScreen("start");
+                      }
+                    },
+                  },
+                ],
+              },
+            },
+          });
+
+          logToConsole("ScreenManager initialized successfully", "success");
+          return true;
+        } catch (error) {
+          logToConsole(
+            `Failed to initialize ScreenManager: ${error.message}`,
+            "error"
+          );
+          return false;
+        }
+      }
+
+      // Test Functions
+      function testStartScreen() {
+        logToConsole("Testing start screen...", "info");
+        screenManager.showScreen("start");
+      }
+
+      function testEndScreen() {
+        logToConsole("Testing end screen...", "info");
+        screenManager.showScreen("end");
+      }
+
+      function testCreditsScreen() {
+        logToConsole("Testing credits screen...", "info");
+        screenManager.showScreen("credits");
+      }
+
+      function testHelpScreen() {
+        logToConsole("Testing help screen...", "info");
+        screenManager.showScreen("help");
+      }
+
+      function testCustomScreen() {
+        logToConsole("Testing custom screen...", "info");
+        screenManager.showScreen("custom");
+      }
+
+      async function testNavigation() {
+        logToConsole("Testing navigation flow...", "info");
+
+        try {
+          await screenManager.showScreen("start");
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          await screenManager.showScreen("help");
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          await screenManager.goBack();
+          logToConsole("Navigation test completed", "success");
+        } catch (error) {
+          logToConsole(`Navigation test failed: ${error.message}`, "error");
+        }
+      }
+
+      async function testAnimations() {
+        logToConsole("Testing animations...", "info");
+
+        const screens = ["start", "end", "credits", "help"];
+
+        for (const screenId of screens) {
+          await screenManager.showScreen(screenId, { animate: true });
+          await new Promise((resolve) => setTimeout(resolve, 800));
+        }
+
+        logToConsole("Animation test completed", "success");
+      }
+
+      function testStateManagement() {
+        logToConsole("Testing state management...", "info");
+
+        try {
+          // Test global state
+          screenManager.setGlobalState("playerName", "TestPlayer");
+          screenManager.setGlobalState("score", 5000);
+
+          const playerName = screenManager.getGlobalState("playerName");
+          const score = screenManager.getGlobalState("score");
+
+          if (playerName === "TestPlayer" && score === 5000) {
+            logToConsole("Global state test passed", "success");
+          } else {
+            logToConsole("Global state test failed", "error");
+          }
+
+          // Test screen data
+          const status = screenManager.getStatus();
+          logToConsole(`Manager status: ${JSON.stringify(status)}`, "info");
+        } catch (error) {
+          logToConsole(
+            `State management test failed: ${error.message}`,
+            "error"
+          );
+        }
+      }
+
+      function testResponsive() {
+        logToConsole("Testing responsive design...", "info");
+        logToConsole("Resize your window to test responsive behavior", "info");
+
+        // Show a screen to test responsiveness
+        screenManager.showScreen("help");
+
+        // Log current viewport info
+        logToConsole(
+          `Viewport: ${window.innerWidth}x${window.innerHeight}`,
+          "info"
+        );
+
+        // Test mobile breakpoint
+        if (window.innerWidth <= 768) {
+          logToConsole("Mobile layout active", "success");
+        } else {
+          logToConsole("Desktop layout active", "success");
+        }
+      }
+
+      async function runAllTests() {
+        logToConsole("🧪 Running comprehensive test suite...", "info");
+        testResults = { passed: 0, failed: 0, total: 0 };
+
+        const tests = [
+          { name: "Screen Creation", fn: () => testStartScreen() },
+          { name: "Navigation", fn: () => testNavigation() },
+          { name: "State Management", fn: () => testStateManagement() },
+          { name: "Animation System", fn: () => testAnimations() },
+        ];
+
+        for (const test of tests) {
+          testResults.total++;
+          try {
+            await test.fn();
+            testResults.passed++;
+            logToConsole(`✅ ${test.name} test passed`, "success");
+          } catch (error) {
+            testResults.failed++;
+            logToConsole(
+              `❌ ${test.name} test failed: ${error.message}`,
+              "error"
+            );
+          }
+
+          // Wait between tests
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+
+        // Final results
+        logToConsole(
+          `🏁 Test suite completed: ${testResults.passed}/${testResults.total} passed`,
+          testResults.failed === 0 ? "success" : "warning"
+        );
+      }
+
+      // Event Listeners
+      document.addEventListener("DOMContentLoaded", () => {
+        logToConsole("DOM loaded, initializing screen system...", "info");
+
+        if (initializeScreenManager()) {
+          logToConsole("🎉 Screen system ready for testing!", "success");
+
+          // Auto-show start screen after brief delay
+          setTimeout(() => {
+            screenManager.showDefaultScreen();
+          }, 1000);
+        }
+      });
+
+      // Listen for screen events
+      document.addEventListener("screenManagerChange", (event) => {
+        const { current, previous } = event.detail;
+        logToConsole(
+          `Screen transition: ${previous?.id || "none"} → ${current.id}`,
+          "info"
+        );
+      });
+
+      document.addEventListener("screenButtonClick", (event) => {
+        const { button, screen } = event.detail;
+        logToConsole(
+          `Button clicked: "${button.label}" on ${screen.id}`,
+          "info"
+        );
+      });
+
+      // Keyboard shortcuts for testing
+      document.addEventListener("keydown", (event) => {
+        if (event.ctrlKey || event.metaKey) {
+          switch (event.key) {
+            case "1":
+              event.preventDefault();
+              testStartScreen();
+              break;
+            case "2":
+              event.preventDefault();
+              testEndScreen();
+              break;
+            case "3":
+              event.preventDefault();
+              testCreditsScreen();
+              break;
+            case "4":
+              event.preventDefault();
+              testHelpScreen();
+              break;
+            case "5":
+              event.preventDefault();
+              testCustomScreen();
+              break;
+          }
+        }
+      });
+
+      // Responsive testing
+      window.addEventListener("resize", () => {
+        logToConsole(
+          `Window resized: ${window.innerWidth}x${window.innerHeight}`,
+          "info"
+        );
+      });
+
+      // Touch testing for mobile
+      document.addEventListener(
+        "touchstart",
+        () => {
+          logToConsole("Touch interaction detected", "info");
+        },
+        { once: true }
+      );
+
+      // Simulate game stats updates
+      function updateGameSimulation() {
+        const scoreElement = document.getElementById("simulatedScore");
+        const levelElement = document.getElementById("simulatedLevel");
+        const timeElement = document.getElementById("simulatedTime");
+
+        if (scoreElement) {
+          const currentScore = parseInt(scoreElement.textContent) || 0;
+          scoreElement.textContent =
+            currentScore + Math.floor(Math.random() * 100);
+        }
+
+        if (timeElement) {
+          const startTime = Date.now() - Math.random() * 60000;
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          const minutes = Math.floor(elapsed / 60)
+            .toString()
+            .padStart(2, "0");
+          const seconds = (elapsed % 60).toString().padStart(2, "0");
+          timeElement.textContent = `${minutes}:${seconds}`;
+        }
+      }
+
+      // Update simulation every 2 seconds
+      setInterval(updateGameSimulation, 2000);
+    </script>
+  </body>
+</html>
