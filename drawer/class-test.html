@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drawer System - Standalone Test</title>
+    <link rel="stylesheet" href="drawer.css" />
+    <style>
+      /* Test page specific styles */
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .test-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 20px;
+      }
+
+      .control-panel {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        height: fit-content;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .main-area {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .control-section {
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .control-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .control-section h3 {
+        margin: 0 0 15px 0;
+        color: #48dbfb;
+        font-size: 16px;
+      }
+
+      .control-btn {
+        background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 3px;
+        font-size: 12px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        font-family: inherit;
+        width: calc(50% - 6px);
+        display: inline-block;
+      }
+
+      .control-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(72, 219, 251, 0.3);
+      }
+
+      .control-btn.danger {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      }
+
+      .control-btn.success {
+        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+      }
+
+      .control-btn.warning {
+        background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+      }
+
+      .control-btn.full-width {
+        width: calc(100% - 6px);
+      }
+
+      .input-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0;
+        font-size: 12px;
+      }
+
+      .input-group label {
+        min-width: 60px;
+        font-weight: bold;
+      }
+
+      .input-group input {
+        flex: 1;
+        padding: 4px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 12px;
+      }
+
+      .input-group input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .input-group select {
+        flex: 1;
+        padding: 4px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 12px;
+      }
+
+      .debug-log {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+        padding: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        margin-top: 15px;
+      }
+
+      .log-entry {
+        margin: 2px 0;
+        opacity: 0.9;
+      }
+
+      .log-entry.success {
+        color: #00b894;
+      }
+      .log-entry.error {
+        color: #ff6b6b;
+      }
+      .log-entry.info {
+        color: #48dbfb;
+      }
+      .log-entry.warning {
+        color: #fdcb6e;
+      }
+
+      .drawer-info {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        margin: 8px 0;
+        font-size: 11px;
+      }
+
+      .drawer-info.active {
+        background: rgba(72, 219, 251, 0.2);
+        border: 1px solid rgba(72, 219, 251, 0.3);
+      }
+
+      @media (max-width: 768px) {
+        .test-container {
+          grid-template-columns: 1fr;
+        }
+
+        .control-btn {
+          font-size: 10px;
+          padding: 6px 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <h2 style="margin: 0 0 20px 0; color: #48dbfb">
+          🧪 Drawer System Test
+        </h2>
+
+        <!-- Quick Actions -->
+        <div class="control-section">
+          <h3>Quick Actions</h3>
+          <button class="control-btn success" onclick="createDefaultDrawers()">
+            Create Test Drawers
+          </button>
+          <button class="control-btn warning" onclick="openAllDrawers()">
+            Open All
+          </button>
+          <button class="control-btn" onclick="closeAllDrawers()">
+            Close All
+          </button>
+          <button class="control-btn danger" onclick="removeAllDrawers()">
+            Remove All
+          </button>
+        </div>
+
+        <!-- Create Custom Drawer -->
+        <div class="control-section">
+          <h3>Create Custom Drawer</h3>
+
+          <div class="input-group">
+            <label>Side:</label>
+            <select id="drawer-side">
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>X:</label>
+            <input type="number" id="icon-x" value="50" min="0" max="800" />
+            <label>Y:</label>
+            <input type="number" id="icon-y" value="100" min="0" max="600" />
+          </div>
+
+          <div class="input-group">
+            <label>Size:</label>
+            <input
+              type="number"
+              id="drawer-size"
+              value="350"
+              min="200"
+              max="800"
+            />
+          </div>
+
+          <div class="input-group">
+            <label>Icon:</label>
+            <input
+              type="text"
+              id="drawer-icon"
+              value="📋"
+              placeholder="Emoji or text"
+            />
+          </div>
+
+          <div class="input-group">
+            <label>Content:</label>
+            <select id="content-type">
+              <option value="simple">Simple Text</option>
+              <option value="list">Item List</option>
+              <option value="stats">Mock Stats</option>
+              <option value="form">Interactive Form</option>
+              <option value="dynamic">Dynamic Counter</option>
+            </select>
+          </div>
+
+          <button
+            class="control-btn success full-width"
+            onclick="createCustomDrawer()"
+          >
+            Create Drawer
+          </button>
+        </div>
+
+        <!-- Drawer Management -->
+        <div class="control-section">
+          <h3>Active Drawers</h3>
+          <div id="drawer-list">
+            <div
+              style="
+                font-size: 12px;
+                opacity: 0.7;
+                text-align: center;
+                padding: 20px;
+              "
+            >
+              No drawers created yet
+            </div>
+          </div>
+        </div>
+
+        <!-- Debug Controls -->
+        <div class="control-section">
+          <h3>Debug & Info</h3>
+          <button class="control-btn" onclick="showDrawerStates()">
+            Show States
+          </button>
+          <button class="control-btn" onclick="testDrawerSequence()">
+            Demo Sequence
+          </button>
+          <button class="control-btn" onclick="clearLog()">Clear Log</button>
+          <button class="control-btn" onclick="toggleDebugMode()">
+            Toggle Debug
+          </button>
+        </div>
+
+        <!-- Debug Log -->
+        <div class="debug-log" id="debug-log">
+          <div class="log-entry info">Drawer system initializing...</div>
+        </div>
+      </div>
+
+      <!-- Main Test Area -->
+      <div class="main-area">
+        <h1 style="margin: 0 0 20px 0">Drawer System Test Area</h1>
+        <p style="font-size: 18px; opacity: 0.8; margin-bottom: 30px">
+          Create drawers and watch them slide in from any side!
+        </p>
+
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+          "
+        >
+          <h3 style="color: #48dbfb; margin: 0 0 15px 0">Test Instructions:</h3>
+          <ol style="text-align: left; font-size: 14px; line-height: 1.6">
+            <li>Click "Create Test Drawers" for a quick demo</li>
+            <li>Use "Create Custom Drawer" to test specific configurations</li>
+            <li>Try different sides, positions, and content types</li>
+            <li>Watch the debug log for detailed information</li>
+            <li>Test responsive behavior by resizing your window</li>
+          </ol>
+        </div>
+
+        <div style="margin-top: 30px; font-size: 12px; opacity: 0.6">
+          <strong>Tip:</strong> Look for drawer icons around the edges of the
+          screen!
+        </div>
+      </div>
+    </div>
+
+    <!-- Include Drawer System -->
+    <script src="Drawer.js"></script>
+
+    <script>
+      // Drawer system instance
+      let drawerManager;
+      let drawerCounter = 0;
+      let debugMode = true;
+
+      // Content templates for testing
+      const contentTemplates = {
+        simple: {
+          title: "Simple Content",
+          content: `
+                    <div style="text-align: center; padding: 20px; color: white;">
+                        <h3 style="color: #48dbfb; margin-bottom: 20px;">📋 Simple Drawer</h3>
+                        <p>This is a basic drawer with simple HTML content.</p>
+                        <p>Perfect for testing the drawer functionality!</p>
+                        <button onclick="alert('Button clicked!')" style="
+                            background: #48dbfb; 
+                            border: none; 
+                            color: white; 
+                            padding: 10px 20px; 
+                            border-radius: 5px; 
+                            cursor: pointer;
+                            margin-top: 15px;
+                        ">Test Button</button>
+                    </div>
+                `,
+        },
+        list: {
+          title: "Item List",
+          content: `
+                    <div style="color: white; padding: 15px;">
+                        <h3 style="color: #48dbfb; margin-bottom: 20px; text-align: center;">📦 Item List</h3>
+                        <div style="display: grid; gap: 10px;">
+                            ${[
+                              "Health Potion",
+                              "Magic Sword",
+                              "Shield",
+                              "Gold Coins",
+                              "Spell Book",
+                            ]
+                              .map(
+                                (item, i) => `
+                                <div style="
+                                    display: flex; 
+                                    align-items: center; 
+                                    gap: 10px; 
+                                    padding: 10px; 
+                                    background: rgba(255,255,255,0.1); 
+                                    border-radius: 8px;
+                                    transition: background 0.3s ease;
+                                " onmouseover="this.style.background='rgba(255,255,255,0.2)'" 
+                                   onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                                    <span style="font-size: 20px;">${
+                                      ["🧪", "⚔️", "🛡️", "🪙", "📚"][i]
+                                    }</span>
+                                    <span style="font-weight: bold;">${item}</span>
+                                </div>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                `,
+        },
+        stats: {
+          title: "Mock Stats",
+          content: `
+                    <div style="color: white; padding: 15px;">
+                        <h3 style="color: #48dbfb; margin-bottom: 20px; text-align: center;">📊 Player Stats</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            ${[
+                              {
+                                label: "Level",
+                                value: "15",
+                                icon: "📈",
+                                color: "#f39c12",
+                              },
+                              {
+                                label: "HP",
+                                value: "85/100",
+                                icon: "❤️",
+                                color: "#e74c3c",
+                              },
+                              {
+                                label: "MP",
+                                value: "45/80",
+                                icon: "💙",
+                                color: "#3498db",
+                              },
+                              {
+                                label: "XP",
+                                value: "1247",
+                                icon: "⭐",
+                                color: "#2ecc71",
+                              },
+                            ]
+                              .map(
+                                (stat) => `
+                                <div style="
+                                    text-align: center; 
+                                    background: rgba(255,255,255,0.1); 
+                                    padding: 15px; 
+                                    border-radius: 8px;
+                                    border-left: 4px solid ${stat.color};
+                                ">
+                                    <div style="font-size: 20px; margin-bottom: 5px;">${stat.icon}</div>
+                                    <div style="font-size: 18px; font-weight: bold; color: ${stat.color};">${stat.value}</div>
+                                    <div style="font-size: 12px; opacity: 0.8;">${stat.label}</div>
+                                </div>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                `,
+        },
+        form: {
+          title: "Interactive Form",
+          content: `
+                    <div style="color: white; padding: 20px;">
+                        <h3 style="color: #48dbfb; margin-bottom: 20px; text-align: center;">📝 Test Form</h3>
+                        <form onsubmit="event.preventDefault(); alert('Form submitted: ' + new FormData(event.target).get('username'));">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Username:</label>
+                                <input name="username" type="text" placeholder="Enter username" style="
+                                    width: 100%; 
+                                    padding: 8px; 
+                                    border: 1px solid rgba(255,255,255,0.3); 
+                                    border-radius: 4px; 
+                                    background: rgba(255,255,255,0.1); 
+                                    color: white;
+                                    box-sizing: border-box;
+                                ">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Difficulty:</label>
+                                <select name="difficulty" style="
+                                    width: 100%; 
+                                    padding: 8px; 
+                                    border: 1px solid rgba(255,255,255,0.3); 
+                                    border-radius: 4px; 
+                                    background: rgba(255,255,255,0.1); 
+                                    color: white;
+                                    box-sizing: border-box;
+                                ">
+                                    <option value="easy">Easy</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                            <button type="submit" style="
+                                width: 100%; 
+                                background: #48dbfb; 
+                                border: none; 
+                                color: white; 
+                                padding: 12px; 
+                                border-radius: 5px; 
+                                cursor: pointer; 
+                                font-weight: bold;
+                            ">Submit</button>
+                        </form>
+                    </div>
+                `,
+        },
+        dynamic: {
+          title: "Dynamic Counter",
+          content: `
+                    <div style="color: white; padding: 20px; text-align: center;">
+                        <h3 style="color: #48dbfb; margin-bottom: 20px;">🔢 Dynamic Counter</h3>
+                        <div id="counter-display" style="
+                            font-size: 48px; 
+                            font-weight: bold; 
+                            color: #48dbfb; 
+                            margin: 20px 0;
+                            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                        ">0</div>
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button onclick="updateCounter(-1)" style="
+                                background: #ff6b6b; 
+                                border: none; 
+                                color: white; 
+                                padding: 10px 20px; 
+                                border-radius: 5px; 
+                                cursor: pointer; 
+                                font-weight: bold;
+                            ">-1</button>
+                            <button onclick="updateCounter(1)" style="
+                                background: #00b894; 
+                                border: none; 
+                                color: white; 
+                                padding: 10px 20px; 
+                                border-radius: 5px; 
+                                cursor: pointer; 
+                                font-weight: bold;
+                            ">+1</button>
+                            <button onclick="resetCounter()" style="
+                                background: #6c5ce7; 
+                                border: none; 
+                                color: white; 
+                                padding: 10px 20px; 
+                                border-radius: 5px; 
+                                cursor: pointer; 
+                                font-weight: bold;
+                            ">Reset</button>
+                        </div>
+                        <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+                            Counter updates in real-time!
+                        </div>
+                    </div>
+                `,
+        },
+      };
+
+      let currentCounter = 0;
+
+      // Counter functions for dynamic content
+      function updateCounter(change) {
+        currentCounter += change;
+        const display = document.getElementById("counter-display");
+        if (display) {
+          display.textContent = currentCounter;
+          display.style.transform = "scale(1.2)";
+          setTimeout(() => {
+            display.style.transform = "scale(1)";
+          }, 200);
+        }
+      }
+
+      function resetCounter() {
+        currentCounter = 0;
+        const display = document.getElementById("counter-display");
+        if (display) {
+          display.textContent = currentCounter;
+          display.style.color = "#ff6b6b";
+          setTimeout(() => {
+            display.style.color = "#48dbfb";
+          }, 500);
+        }
+      }
+
+      // Initialize drawer system
+      function initializeDrawerSystem() {
+        try {
+          drawerManager = new DrawerManager({
+            enableDebugLogs: debugMode,
+            defaultAnimationDuration: 350,
+            iconSize: 55,
+          });
+
+          logMessage("Drawer system initialized successfully!", "success");
+        } catch (error) {
+          logMessage(`Initialization failed: ${error.message}`, "error");
+        }
+      }
+
+      // Create default test drawers
+      function createDefaultDrawers() {
+        try {
+          const testDrawers = [
+            {
+              side: "left",
+              pos: { x: 30, y: 150 },
+              icon: "📦",
+              content: "list",
+              size: 320,
+            },
+            {
+              side: "right",
+              pos: { x: 30, y: 100 },
+              icon: "📊",
+              content: "stats",
+              size: 350,
+            },
+            {
+              side: "top",
+              pos: { x: 300, y: 30 },
+              icon: "📝",
+              content: "form",
+              size: 250,
+            },
+            {
+              side: "bottom",
+              pos: { x: 500, y: 30 },
+              icon: "🔢",
+              content: "dynamic",
+              size: 200,
+            },
+          ];
+
+          testDrawers.forEach((config, index) => {
+            setTimeout(() => {
+              const drawerId = drawerManager.createDrawer(
+                config.side,
+                config.pos,
+                {
+                  size: config.size,
+                  icon: config.icon,
+                  title: contentTemplates[config.content].title,
+                }
+              );
+
+              renderDrawerContent(drawerId, config.content);
+              logMessage(
+                `Created ${config.side} drawer with ${config.content} content`,
+                "success"
+              );
+            }, index * 200);
+          });
+
+          updateDrawerList();
+          logMessage("Default test drawers created!", "success");
+        } catch (error) {
+          logMessage(
+            `Failed to create default drawers: ${error.message}`,
+            "error"
+          );
+        }
+      }
+
+      // Create custom drawer
+      function createCustomDrawer() {
+        try {
+          const side = document.getElementById("drawer-side").value;
+          const x = parseInt(document.getElementById("icon-x").value);
+          const y = parseInt(document.getElementById("icon-y").value);
+          const size = parseInt(document.getElementById("drawer-size").value);
+          const icon = document.getElementById("drawer-icon").value || "📋";
+          const contentType = document.getElementById("content-type").value;
+
+          const drawerId = drawerManager.createDrawer(
+            side,
+            { x, y },
+            {
+              size,
+              icon,
+              title: contentTemplates[contentType].title,
+            }
+          );
+
+          renderDrawerContent(drawerId, contentType);
+          updateDrawerList();
+
+          logMessage(
+            `Created custom ${side} drawer at (${x}, ${y}) with ${contentType} content`,
+            "success"
+          );
+        } catch (error) {
+          logMessage(
+            `Failed to create custom drawer: ${error.message}`,
+            "error"
+          );
+        }
+      }
+
+      // Render content in drawer
+      function renderDrawerContent(drawerId, contentType) {
+        const container = document.querySelector(
+          drawerManager.getDrawerContainer(drawerId)
+        );
+        if (container && contentTemplates[contentType]) {
+          container.innerHTML = contentTemplates[contentType].content;
+        }
+      }
+
+      // Update drawer list display
+      function updateDrawerList() {
+        const listContainer = document.getElementById("drawer-list");
+        const drawers = drawerManager.getAllDrawers();
+
+        if (drawers.length === 0) {
+          listContainer.innerHTML = `
+                    <div style="font-size: 12px; opacity: 0.7; text-align: center; padding: 20px;">
+                        No drawers created yet
+                    </div>
+                `;
+          return;
+        }
+
+        listContainer.innerHTML = drawers
+          .map(
+            (drawer) => `
+                <div class="drawer-info ${
+                  drawer.isOpen ? "active" : ""
+                }" id="drawer-info-${drawer.id}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <strong>${drawer.id}</strong>
+                        <span style="font-size: 16px;">${
+                          drawer.options.icon
+                        }</span>
+                    </div>
+                    <div style="font-size: 10px; opacity: 0.8; margin-bottom: 8px;">
+                        ${drawer.side} side • ${
+              drawer.isOpen ? "OPEN" : "CLOSED"
+            }
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="control-btn" onclick="toggleSpecificDrawer('${
+                          drawer.id
+                        }')" style="font-size: 10px; padding: 4px 8px;">
+                            ${drawer.isOpen ? "Close" : "Open"}
+                        </button>
+                        <button class="control-btn danger" onclick="removeSpecificDrawer('${
+                          drawer.id
+                        }')" style="font-size: 10px; padding: 4px 8px;">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      // Control functions
+      function openAllDrawers() {
+        const drawers = drawerManager.getAllDrawers();
+        drawers.forEach((drawer) => {
+          drawerManager.openDrawer(drawer.id);
+        });
+        updateDrawerList();
+        logMessage(`Opened ${drawers.length} drawers`, "info");
+      }
+
+      function closeAllDrawers() {
+        drawerManager.closeAllDrawers();
+        updateDrawerList();
+        logMessage("Closed all drawers", "info");
+      }
+
+      function removeAllDrawers() {
+        if (confirm("Remove all drawers?")) {
+          const drawers = drawerManager.getAllDrawers();
+          drawers.forEach((drawer) => {
+            drawerManager.removeDrawer(drawer.id);
+          });
+          updateDrawerList();
+          logMessage(`Removed ${drawers.length} drawers`, "warning");
+        }
+      }
+
+      function toggleSpecificDrawer(drawerId) {
+        const isOpen = drawerManager.toggleDrawer(drawerId);
+        updateDrawerList();
+        logMessage(
+          `${isOpen ? "Opened" : "Closed"} drawer: ${drawerId}`,
+          "info"
+        );
+      }
+
+      function removeSpecificDrawer(drawerId) {
+        if (confirm(`Remove drawer ${drawerId}?`)) {
+          drawerManager.removeDrawer(drawerId);
+          updateDrawerList();
+          logMessage(`Removed drawer: ${drawerId}`, "warning");
+        }
+      }
+
+      function showDrawerStates() {
+        const drawers = drawerManager.getAllDrawers();
+        const states = drawers
+          .map(
+            (d) => `${d.id}: ${d.side} side, ${d.isOpen ? "open" : "closed"}`
+          )
+          .join("\n");
+        alert(`Drawer States:\n\n${states || "No drawers created"}`);
+        logMessage("Displayed drawer states", "info");
+      }
+
+      function testDrawerSequence() {
+        const drawers = drawerManager.getAllDrawers();
+        if (drawers.length === 0) {
+          logMessage("No drawers to sequence - create some first!", "warning");
+          return;
+        }
+
+        logMessage("Starting drawer sequence demo...", "info");
+
+        // Close all first
+        drawerManager.closeAllDrawers();
+
+        // Open each drawer with delay
+        drawers.forEach((drawer, index) => {
+          setTimeout(() => {
+            drawerManager.openDrawer(drawer.id);
+            logMessage(`Opened: ${drawer.id}`, "info");
+            updateDrawerList();
+          }, (index + 1) * 800);
+        });
+
+        // Close all after sequence
+        setTimeout(() => {
+          drawerManager.closeAllDrawers();
+          updateDrawerList();
+          logMessage("Sequence complete - closed all drawers", "success");
+        }, (drawers.length + 2) * 800);
+      }
+
+      function toggleDebugMode() {
+        debugMode = !debugMode;
+        if (drawerManager) {
+          drawerManager.options.enableDebugLogs = debugMode;
+        }
+        logMessage(`Debug mode ${debugMode ? "enabled" : "disabled"}`, "info");
+      }
+
+      // Logging function
+      function logMessage(message, type = "info") {
+        const log = document.getElementById("debug-log");
+        const entry = document.createElement("div");
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+
+        // Keep only last 100 messages
+        while (log.children.length > 100) {
+          log.removeChild(log.firstChild);
+        }
+      }
+
+      function clearLog() {
+        document.getElementById("debug-log").innerHTML = "";
+        logMessage("Log cleared", "info");
+      }
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        logMessage("Page loaded, initializing drawer system...", "info");
+        setTimeout(initializeDrawerSystem, 100);
+      });
+
+      // Update drawer list when drawers change
+      setInterval(() => {
+        if (drawerManager) {
+          updateDrawerList();
+        }
+      }, 2000);
+    </script>
+  </body>
+</html>

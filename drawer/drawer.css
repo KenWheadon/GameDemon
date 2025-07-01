@@ -1,0 +1,434 @@
+/* Universal Drawer System CSS - Animations & Styling */
+
+/* CSS Variables for easy theming */
+:root {
+  --drawer-background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+  --drawer-border-color: rgba(255, 255, 255, 0.2);
+  --drawer-icon-background: rgba(255, 255, 255, 0.2);
+  --drawer-icon-border: rgba(255, 255, 255, 0.3);
+  --drawer-icon-hover: rgba(72, 219, 251, 0.3);
+  --drawer-close-hover: rgba(255, 107, 107, 0.3);
+  --drawer-shadow: rgba(0, 0, 0, 0.3);
+  --drawer-text-color: white;
+  --drawer-transition-speed: 300ms;
+  --drawer-transition-easing: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Main drawer system container */
+#drawer-system-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Drawer Container Base Styles */
+.drawer-container {
+  position: fixed;
+  background: var(--drawer-background);
+  backdrop-filter: blur(15px);
+  border: 2px solid var(--drawer-border-color);
+  box-shadow: 0 20px 40px var(--drawer-shadow);
+  transition: transform var(--drawer-transition-speed) var(--drawer-transition-easing);
+  pointer-events: auto;
+  overflow: hidden;
+  color: var(--drawer-text-color);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+/* Side-specific positioning and transforms */
+.drawer-left {
+  top: 0;
+  left: 0;
+  height: 100vh;
+  border-radius: 0 15px 15px 0;
+  border-left: none;
+}
+
+.drawer-right {
+  top: 0;
+  right: 0;
+  height: 100vh;
+  border-radius: 15px 0 0 15px;
+  border-right: none;
+}
+
+.drawer-top {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  border-radius: 0 0 15px 15px;
+  border-top: none;
+}
+
+.drawer-bottom {
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  border-radius: 15px 15px 0 0;
+  border-bottom: none;
+}
+
+/* Drawer State Classes */
+.drawer-closed.drawer-left {
+  transform: translateX(-100%);
+}
+
+.drawer-closed.drawer-right {
+  transform: translateX(100%);
+}
+
+.drawer-closed.drawer-top {
+  transform: translateY(-100%);
+}
+
+.drawer-closed.drawer-bottom {
+  transform: translateY(100%);
+}
+
+.drawer-open {
+  transform: translate(0, 0) !important;
+}
+
+/* Drawer Content Area */
+.drawer-content {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Custom Scrollbar for Drawer Content */
+.drawer-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.drawer-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.drawer-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.drawer-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Drawer Icon Styles */
+.drawer-icon {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  background: var(--drawer-icon-background);
+  border: 2px solid var(--drawer-icon-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  color: var(--drawer-text-color);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  user-select: none;
+  z-index: 1010;
+}
+
+.drawer-icon:hover {
+  transform: scale(1.1);
+  background: var(--drawer-icon-hover);
+  border-color: rgba(72, 219, 251, 0.5);
+  box-shadow: 0 0 20px rgba(72, 219, 251, 0.3);
+}
+
+.drawer-icon:active {
+  transform: scale(0.95);
+}
+
+/* Icon positioning variants */
+.drawer-icon-left {
+  border-radius: 50% 15px 15px 50%;
+}
+
+.drawer-icon-right {
+  border-radius: 15px 50% 50% 15px;
+}
+
+.drawer-icon-top {
+  border-radius: 50% 50% 15px 15px;
+}
+
+.drawer-icon-bottom {
+  border-radius: 15px 15px 50% 50%;
+}
+
+/* Close Button */
+.drawer-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--drawer-text-color);
+  transition: all 0.3s ease;
+  z-index: 10;
+  user-select: none;
+}
+
+.drawer-close-button:hover {
+  background: var(--drawer-close-hover);
+  transform: scale(1.1);
+}
+
+.drawer-close-button:active {
+  transform: scale(0.9);
+}
+
+/* Animation Classes for JavaScript Control */
+.drawer-animating {
+  pointer-events: none;
+}
+
+.drawer-slide-in {
+  animation: slideIn var(--drawer-transition-speed) var(--drawer-transition-easing);
+}
+
+.drawer-slide-out {
+  animation: slideOut var(--drawer-transition-speed) var(--drawer-transition-easing);
+}
+
+/* Keyframe Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Backdrop Animation for Modal-like Behavior */
+.drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--drawer-transition-speed) ease;
+  z-index: 999;
+}
+
+.drawer-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .drawer-left,
+  .drawer-right {
+    width: 90vw !important;
+    max-width: 350px;
+  }
+  
+  .drawer-top,
+  .drawer-bottom {
+    height: 80vh !important;
+    max-height: 400px;
+  }
+  
+  .drawer-content {
+    padding: 15px;
+  }
+  
+  .drawer-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .drawer-left,
+  .drawer-right {
+    width: 95vw !important;
+  }
+  
+  .drawer-top,
+  .drawer-bottom {
+    height: 75vh !important;
+  }
+  
+  .drawer-content {
+    padding: 12px;
+  }
+  
+  .drawer-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  
+  .drawer-close-button {
+    width: 25px;
+    height: 25px;
+    font-size: 14px;
+    top: 8px;
+    right: 8px;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .drawer-container {
+    border: 3px solid white;
+    background: rgba(0, 0, 0, 0.9);
+  }
+  
+  .drawer-icon {
+    border: 3px solid white;
+    background: rgba(0, 0, 0, 0.8);
+  }
+  
+  .drawer-close-button {
+    border: 2px solid white;
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .drawer-container,
+  .drawer-icon,
+  .drawer-close-button,
+  .drawer-backdrop {
+    transition: none;
+  }
+  
+  .drawer-icon:hover {
+    transform: none;
+  }
+  
+  .drawer-close-button:hover {
+    transform: none;
+  }
+  
+  @keyframes slideIn,
+  @keyframes slideOut {
+    from, to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* Focus States for Accessibility */
+.drawer-icon:focus {
+  outline: 3px solid #48dbfb;
+  outline-offset: 3px;
+}
+
+.drawer-close-button:focus {
+  outline: 2px solid #48dbfb;
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  #drawer-system-container {
+    display: none;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --drawer-background: linear-gradient(135deg, rgba(52, 73, 154, 0.95), rgba(78, 56, 122, 0.95));
+    --drawer-border-color: rgba(255, 255, 255, 0.3);
+    --drawer-icon-background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Light Mode Support */
+@media (prefers-color-scheme: light) {
+  :root {
+    --drawer-background: linear-gradient(135deg, rgba(102, 126, 234, 0.98), rgba(118, 75, 162, 0.98));
+    --drawer-text-color: white;
+  }
+}
+
+/* Custom Theme Classes (Optional) */
+.drawer-theme-achievement {
+  --drawer-background: linear-gradient(135deg, rgba(72, 219, 251, 0.95), rgba(10, 189, 227, 0.95));
+}
+
+.drawer-theme-inventory {
+  --drawer-background: linear-gradient(135deg, rgba(253, 203, 110, 0.95), rgba(230, 126, 34, 0.95));
+}
+
+.drawer-theme-stats {
+  --drawer-background: linear-gradient(135deg, rgba(0, 184, 148, 0.95), rgba(0, 160, 133, 0.95));
+}
+
+.drawer-theme-custom {
+  --drawer-background: linear-gradient(135deg, rgba(155, 89, 182, 0.95), rgba(142, 68, 173, 0.95));
+}
+
+/* Animation Performance Optimizations */
+.drawer-container {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+.drawer-icon {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Ensure drawers are above other content */
+.drawer-container {
+  isolation: isolate;
+}
+
+/* Prevent text selection in drawer UI elements */
+.drawer-icon,
+.drawer-close-button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
