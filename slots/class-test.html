@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slot Machine Test</title>
+    <link rel="stylesheet" href="slots.css" />
+  </head>
+  <body
+    style="
+      background: #111;
+      color: #fff;
+      font-family: sans-serif;
+      padding: 20px;
+    "
+  >
+    <h2>🎰 Slot Machine Test</h2>
+
+    <div style="margin-bottom: 1em">
+      <button id="add-credits-btn">Add 100 Credits</button>
+      <button id="force-win-btn">Force Win</button>
+      <button id="force-jackpot-btn">Force Jackpot</button>
+      <span id="credits-display">Credits: 0</span>
+    </div>
+
+    <div id="slot-machine-container"></div>
+
+    <script src="slots.js"></script>
+    <script src="slots-manager.js"></script>
+    <script>
+      class SlotMachineTest {
+        constructor() {
+          this.credits = 500;
+          this.slotManager = null;
+          this.init();
+        }
+
+        async init() {
+          const mockGame = {
+            gameState: {
+              trainingScore: this.credits,
+              player: {
+                attack: 0,
+                defense: 0,
+                hp: 100,
+                maxHp: 100,
+                sanity: 10,
+                maxSanity: 10,
+              },
+            },
+            playSound: (name) => console.log(`🔊 ${name}`),
+            unlockAchievement: (id) => console.log(`🏆 ${id}`),
+          };
+
+          this.slotManager = new SlotMachineManager(mockGame, {
+            enableAchievements: true,
+            enableAudio: true,
+            creditSource: "trainingScore",
+          });
+
+          this.slotManager.createUI("#slot-machine-container");
+          this.updateCreditsDisplay();
+
+          // Buttons
+          document.getElementById("add-credits-btn").onclick = () => {
+            this.credits += 100;
+            mockGame.gameState.trainingScore = this.credits;
+            this.slotManager.syncCredits();
+            this.updateCreditsDisplay();
+          };
+
+          document.getElementById("force-win-btn").onclick = () => {
+            const sym = "vanilla";
+            this.slotManager.slotMachine.setResults([
+              { type: "win", symbol: sym },
+            ]);
+            console.log("Next spin will be forced win:", sym);
+          };
+
+          document.getElementById("force-jackpot-btn").onclick = () => {
+            const sym = "ice";
+            this.slotManager.slotMachine.setResults([
+              { type: "win", symbol: sym },
+            ]);
+            console.log("Next spin will be jackpot:", sym);
+          };
+
+          // Update credit display after spin
+          this.slotManager.slotMachine.addEventListener(
+            "credits-changed",
+            () => {
+              this.credits = this.slotManager.slotMachine.getCredits();
+              this.updateCreditsDisplay();
+            }
+          );
+        }
+
+        updateCreditsDisplay() {
+          document.getElementById(
+            "credits-display"
+          ).textContent = `Credits: ${this.credits}`;
+        }
+      }
+
+      new SlotMachineTest();
+    </script>
+  </body>
+</html>
