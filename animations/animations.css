@@ -1,0 +1,813 @@
+/* Animation Manager CSS - Animation Controls and Developer Tools */
+
+/* CSS Variables for easy theming */
+:root {
+  --animation-primary-color: #3498db;
+  --animation-secondary-color: #2ecc71;
+  --animation-danger-color: #e74c3c;
+  --animation-warning-color: #f39c12;
+  --animation-success-color: #27ae60;
+  --animation-info-color: #17a2b8;
+
+  --animation-background-primary: rgba(44, 62, 80, 0.95);
+  --animation-background-secondary: rgba(52, 73, 94, 0.9);
+  --animation-background-accent: rgba(255, 255, 255, 0.1);
+
+  --animation-text-primary: #ffffff;
+  --animation-text-secondary: #bdc3c7;
+  --animation-text-muted: #95a5a6;
+
+  --animation-border-color: rgba(255, 255, 255, 0.2);
+  --animation-shadow-color: rgba(0, 0, 0, 0.3);
+
+  --animation-transition-speed: 0.3s;
+  --animation-border-radius: 8px;
+  --animation-z-index-base: 1100;
+}
+
+/* Animation Debug Panel */
+.animation-debug-panel {
+  position: fixed;
+  width: 320px;
+  max-height: 80vh;
+  background: var(--animation-background-primary);
+  border: 1px solid var(--animation-border-color);
+  border-radius: var(--animation-border-radius);
+  box-shadow: 0 10px 30px var(--animation-shadow-color);
+  backdrop-filter: blur(10px);
+  color: var(--animation-text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Arial, sans-serif;
+  font-size: 14px;
+  z-index: var(--animation-z-index-base);
+  transition: transform var(--animation-transition-speed) ease,
+    opacity var(--animation-transition-speed) ease;
+  overflow: hidden;
+}
+
+/* Positioning */
+.animation-debug-panel[data-position="top-left"] {
+  top: 20px;
+  left: 20px;
+}
+
+.animation-debug-panel[data-position="top-right"] {
+  top: 20px;
+  right: 20px;
+}
+
+.animation-debug-panel[data-position="bottom-left"] {
+  bottom: 20px;
+  left: 20px;
+}
+
+.animation-debug-panel[data-position="bottom-right"] {
+  bottom: 20px;
+  right: 20px;
+}
+
+/* Panel states */
+.animation-debug-panel.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+}
+
+.animation-debug-panel.minimized .animation-debug-content {
+  display: none;
+}
+
+.animation-debug-panel.minimized {
+  width: auto;
+  min-width: 200px;
+}
+
+.animation-debug-panel.dragging {
+  opacity: 0.8;
+  user-select: none;
+}
+
+/* Panel header */
+.animation-debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: var(--animation-background-secondary);
+  border-bottom: 1px solid var(--animation-border-color);
+  cursor: move;
+  user-select: none;
+}
+
+.animation-debug-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--animation-primary-color);
+}
+
+.animation-debug-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.animation-debug-minimize,
+.animation-debug-close {
+  background: transparent;
+  border: none;
+  color: var(--animation-text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--animation-transition-speed) ease;
+}
+
+.animation-debug-minimize:hover {
+  background: var(--animation-warning-color);
+  color: white;
+}
+
+.animation-debug-close:hover {
+  background: var(--animation-danger-color);
+  color: white;
+}
+
+/* Panel content */
+.animation-debug-content {
+  padding: 15px;
+  max-height: calc(80vh - 50px);
+  overflow-y: auto;
+}
+
+/* Sections */
+.animation-debug-section {
+  margin-bottom: 20px;
+}
+
+.animation-debug-section:last-child {
+  margin-bottom: 0;
+}
+
+.animation-debug-section-title {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--animation-secondary-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Performance metrics */
+.animation-debug-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.animation-metric {
+  background: var(--animation-background-accent);
+  padding: 8px 12px;
+  border-radius: var(--animation-border-radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.animation-metric-label {
+  color: var(--animation-text-secondary);
+  font-size: 13px;
+}
+
+.animation-metric-value {
+  color: var(--animation-primary-color);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Active animations list */
+.animation-active-list {
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--animation-background-accent);
+  border-radius: var(--animation-border-radius);
+  padding: 8px;
+}
+
+.animation-list-item {
+  background: var(--animation-background-secondary);
+  border-radius: var(--animation-border-radius);
+  padding: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background var(--animation-transition-speed) ease;
+}
+
+.animation-list-item:last-child {
+  margin-bottom: 0;
+}
+
+.animation-list-item:hover {
+  background: rgba(52, 152, 219, 0.2);
+}
+
+.animation-list-item.selected {
+  border: 1px solid var(--animation-primary-color);
+  background: rgba(52, 152, 219, 0.3);
+}
+
+.animation-item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.animation-item-type {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.animation-item-id {
+  flex-grow: 1;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  color: var(--animation-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.animation-item-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.animation-item-btn {
+  background: transparent;
+  border: none;
+  color: var(--animation-text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px;
+  border-radius: 4px;
+  transition: all var(--animation-transition-speed) ease;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.animation-item-btn:hover {
+  background: var(--animation-background-accent);
+  color: var(--animation-text-primary);
+}
+
+.animation-item-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.animation-progress-bar {
+  flex-grow: 1;
+  height: 6px;
+  background: var(--animation-background-accent);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.animation-progress-fill {
+  height: 100%;
+  background: var(--animation-primary-color);
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.animation-progress-text {
+  font-size: 12px;
+  color: var(--animation-text-secondary);
+  min-width: 36px;
+  text-align: right;
+}
+
+.animation-list-count {
+  text-align: center;
+  color: var(--animation-text-muted);
+  font-size: 12px;
+  padding: 6px;
+  background: var(--animation-background-secondary);
+  border-radius: var(--animation-border-radius);
+  margin-top: 8px;
+}
+
+/* Empty state */
+.animation-empty-state {
+  text-align: center;
+  color: var(--animation-text-muted);
+  padding: 16px;
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Control buttons */
+.animation-debug-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.animation-debug-btn {
+  background: var(--animation-primary-color);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: var(--animation-border-radius);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all var(--animation-transition-speed) ease;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.animation-debug-btn:hover {
+  filter: brightness(1.1);
+}
+
+.animation-debug-btn:active {
+  transform: translateY(1px);
+}
+
+.animation-debug-btn.animation-debug-btn-danger {
+  background: var(--animation-danger-color);
+}
+
+.animation-debug-refresh {
+  background: transparent;
+  border: none;
+  color: var(--animation-text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all var(--animation-transition-speed) ease;
+}
+
+.animation-debug-refresh:hover {
+  background: var(--animation-background-accent);
+  color: var(--animation-text-primary);
+}
+
+/* Speed control */
+.animation-speed-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.animation-speed-slider {
+  flex-grow: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--animation-background-accent);
+  border-radius: 3px;
+  outline: none;
+}
+
+.animation-speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--animation-primary-color);
+  cursor: pointer;
+  transition: all var(--animation-transition-speed) ease;
+}
+
+.animation-speed-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--animation-primary-color);
+  cursor: pointer;
+  transition: all var(--animation-transition-speed) ease;
+}
+
+.animation-speed-slider::-webkit-slider-thumb:hover,
+.animation-speed-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+}
+
+.animation-speed-value {
+  font-family: "Courier New", monospace;
+  color: var(--animation-text-secondary);
+  font-size: 14px;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Animation Inspector */
+.animation-inspector {
+  position: fixed;
+  top: 50px;
+  left: 50px;
+  width: 600px;
+  height: 500px;
+  max-height: 80vh;
+  background: var(--animation-background-primary);
+  border: 1px solid var(--animation-border-color);
+  border-radius: var(--animation-border-radius);
+  box-shadow: 0 10px 30px var(--animation-shadow-color);
+  backdrop-filter: blur(10px);
+  color: var(--animation-text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Arial, sans-serif;
+  font-size: 14px;
+  z-index: var(--animation-z-index-base);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--animation-transition-speed) ease,
+    opacity var(--animation-transition-speed) ease;
+  overflow: hidden;
+}
+
+/* Inspector states */
+.animation-inspector.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+}
+
+.animation-inspector.minimized .animation-inspector-content {
+  display: none;
+}
+
+.animation-inspector.dragging {
+  opacity: 0.8;
+  user-select: none;
+}
+
+/* Inspector header */
+.animation-inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: var(--animation-background-secondary);
+  border-bottom: 1px solid var(--animation-border-color);
+  cursor: move;
+  user-select: none;
+}
+
+.animation-inspector-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--animation-primary-color);
+}
+
+.animation-inspector-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.animation-inspector-minimize,
+.animation-inspector-close {
+  background: transparent;
+  border: none;
+  color: var(--animation-text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--animation-transition-speed) ease;
+}
+
+.animation-inspector-minimize:hover {
+  background: var(--animation-warning-color);
+  color: white;
+}
+
+.animation-inspector-close:hover {
+  background: var(--animation-danger-color);
+  color: white;
+}
+
+/* Inspector content */
+.animation-inspector-content {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.animation-inspector-sidebar {
+  width: 200px;
+  border-right: 1px solid var(--animation-border-color);
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.animation-inspector-main {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+/* Inspector sections */
+.animation-inspector-section {
+  margin-bottom: 20px;
+}
+
+.animation-inspector-section:last-child {
+  margin-bottom: 0;
+}
+
+.animation-inspector-section-title {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--animation-secondary-color);
+}
+
+/* Animation details */
+.animation-inspector-details {
+  background: var(--animation-background-accent);
+  border-radius: var(--animation-border-radius);
+  padding: 12px;
+}
+
+.animation-detail {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.animation-detail:last-child {
+  margin-bottom: 0;
+}
+
+.animation-detail-label {
+  width: 120px;
+  color: var(--animation-text-secondary);
+  font-size: 13px;
+}
+
+.animation-detail-value {
+  flex-grow: 1;
+  color: var(--animation-text-primary);
+  font-size: 13px;
+}
+
+/* Animation status indicators */
+.animation-status {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.animation-status.playing {
+  background: var(--animation-success-color);
+  color: white;
+}
+
+.animation-status.paused {
+  background: var(--animation-warning-color);
+  color: white;
+}
+
+.animation-status.stopped {
+  background: var(--animation-danger-color);
+  color: white;
+}
+
+.animation-item-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+.animation-item-status.playing {
+  background: var(--animation-success-color);
+  box-shadow: 0 0 5px var(--animation-success-color);
+}
+
+.animation-item-status.paused {
+  background: var(--animation-warning-color);
+}
+
+.animation-item-status.stopped {
+  background: var(--animation-danger-color);
+}
+
+/* Timeline */
+.animation-timeline {
+  height: 40px;
+  background: var(--animation-background-accent);
+  border-radius: var(--animation-border-radius);
+  position: relative;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.animation-timeline-track {
+  height: 100%;
+  position: relative;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.animation-timeline-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background: var(--animation-text-muted);
+  opacity: 0.3;
+}
+
+.animation-timeline-marker.major {
+  opacity: 0.6;
+  height: 100%;
+}
+
+.animation-timeline-label {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--animation-text-muted);
+}
+
+.animation-timeline-playhead {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--animation-primary-color);
+  box-shadow: 0 0 5px var(--animation-primary-color);
+  z-index: 1;
+}
+
+/* Animation controls */
+.animation-inspector-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.animation-inspector-btn {
+  background: var(--animation-background-secondary);
+  border: 1px solid var(--animation-border-color);
+  color: var(--animation-text-primary);
+  padding: 6px 12px;
+  border-radius: var(--animation-border-radius);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all var(--animation-transition-speed) ease;
+}
+
+.animation-inspector-btn:hover {
+  background: var(--animation-primary-color);
+  color: white;
+}
+
+.animation-inspector-playback {
+  flex-grow: 1;
+  margin-left: 8px;
+}
+
+.animation-progress-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--animation-background-accent);
+  border-radius: 3px;
+  outline: none;
+}
+
+.animation-progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--animation-primary-color);
+  cursor: pointer;
+  transition: all var(--animation-transition-speed) ease;
+}
+
+.animation-progress-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--animation-primary-color);
+  cursor: pointer;
+  transition: all var(--animation-transition-speed) ease;
+}
+
+/* CSS Animation utility classes */
+.animation-accelerated {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .animation-debug-panel {
+    width: calc(100% - 40px);
+    max-height: 70vh;
+  }
+
+  .animation-inspector {
+    width: calc(100% - 40px);
+    height: auto;
+    max-height: 80vh;
+    top: 20px;
+    left: 20px;
+  }
+
+  .animation-inspector-content {
+    flex-direction: column;
+  }
+
+  .animation-inspector-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--animation-border-color);
+    max-height: 150px;
+  }
+
+  .animation-debug-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .animation-debug-panel,
+  .animation-inspector,
+  .animation-progress-fill,
+  .animation-debug-btn,
+  .animation-inspector-btn,
+  .animation-speed-slider::-webkit-slider-thumb,
+  .animation-speed-slider::-moz-range-thumb,
+  .animation-progress-slider::-webkit-slider-thumb,
+  .animation-progress-slider::-moz-range-thumb {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --animation-border-color: white;
+    --animation-text-secondary: white;
+    --animation-text-muted: rgba(255, 255, 255, 0.8);
+  }
+
+  .animation-debug-panel,
+  .animation-inspector {
+    border: 2px solid white;
+  }
+
+  .animation-list-item {
+    border: 1px solid var(--animation-border-color);
+  }
+
+  .animation-progress-bar,
+  .animation-timeline {
+    border: 1px solid white;
+  }
+}
+
+/* Print styles - hide UI when printing */
+@media print {
+  .animation-debug-panel,
+  .animation-inspector {
+    display: none !important;
+  }
+}

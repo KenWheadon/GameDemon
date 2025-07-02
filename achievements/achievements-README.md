@@ -48,24 +48,27 @@ achievement-system/
 ## 🏗️ **Architecture**
 
 ### **Two-Class System:**
+
 - **`Achievements`** - Reusable UI and data management (build once, use everywhere)
 - **`AchievementManager`** - Game-specific integration (customize per game)
 
 ### **Benefits:**
+
 ✅ **Drop-in ready** for any game framework  
 ✅ **Consistent UI/UX** across all your games  
 ✅ **Clean separation** of concerns  
-✅ **Easy to extend** and customize  
+✅ **Easy to extend** and customize
 
 ---
 
 ## 📊 **Achievement Data Structure**
 
 ### **Basic Achievement**
+
 ```javascript
 {
   id: "unique_id",
-  name: "Achievement Name", 
+  name: "Achievement Name",
   description: "What the player did",
   icon: "🏆", // emoji or image path
   points: 10,
@@ -74,6 +77,7 @@ achievement-system/
 ```
 
 ### **Progress Achievement**
+
 ```javascript
 {
   id: "enemy_slayer",
@@ -90,11 +94,12 @@ achievement-system/
 ```
 
 ### **Hidden Achievement**
+
 ```javascript
 {
   id: "secret_finder",
   name: "???",
-  description: "???", 
+  description: "???",
   icon: "❓",
   points: 100,
   hidden: true,
@@ -111,15 +116,18 @@ achievement-system/
 ## **Achievements Class** (Reusable Core)
 
 ### **Constructor**
+
 ```javascript
-new Achievements(containerSelector, options = {})
+new Achievements(containerSelector, (options = {}));
 ```
 
 **Parameters:**
+
 - `containerSelector` - CSS selector for achievement container
 - `options` - Configuration object
 
 **Options:**
+
 ```javascript
 {
   storageKey: 'achievements',      // localStorage key
@@ -131,78 +139,102 @@ new Achievements(containerSelector, options = {})
 ### **Core Methods**
 
 #### **`setAchievementData(achievementData)`**
+
 Initialize with achievement definitions
+
 ```javascript
 achievements.setAchievementData(GAME_ACHIEVEMENTS);
 ```
 
 #### **`unlock(achievementId)`**
+
 Unlock an achievement (if not already unlocked)
+
 ```javascript
-const unlocked = achievements.unlock('first_win'); // returns boolean
+const unlocked = achievements.unlock("first_win"); // returns boolean
 ```
 
 #### **`updateProgress(achievementId, currentValue)`**
+
 Update progress with auto-unlock and validation
+
 ```javascript
-achievements.updateProgress('enemy_slayer', 50); // Auto-unlocks at target
+achievements.updateProgress("enemy_slayer", 50); // Auto-unlocks at target
 ```
 
 #### **`updateUnlocks(unlockedArray)`**
+
 Batch update from save data
+
 ```javascript
-achievements.updateUnlocks(['first_win', 'enemy_slayer']);
+achievements.updateUnlocks(["first_win", "enemy_slayer"]);
 ```
 
 #### **`reset()`**
+
 Reset all achievements to locked state
+
 ```javascript
 achievements.reset();
 ```
 
 #### **`getUnlocked()`**
+
 Get array of unlocked achievement IDs
+
 ```javascript
 const unlocked = achievements.getUnlocked(); // ['first_win', 'boss_killer']
 ```
 
 #### **`isUnlocked(achievementId)`**
+
 Check if specific achievement is unlocked
+
 ```javascript
-if (achievements.isUnlocked('first_win')) {
+if (achievements.isUnlocked("first_win")) {
   // Achievement is unlocked
 }
 ```
 
 #### **`getTotalPoints()`**
+
 Get total points from unlocked achievements
+
 ```javascript
 const points = achievements.getTotalPoints(); // 150
 ```
 
 #### **`getCompletionPercentage()`**
+
 Get completion percentage (0-100)
+
 ```javascript
 const completion = achievements.getCompletionPercentage(); // 75
 ```
 
 #### **`save(customKey)` / `load(customKey)`**
+
 Save/load to localStorage
+
 ```javascript
 achievements.save(); // Uses default key
-achievements.load('backup_key'); // Custom key
+achievements.load("backup_key"); // Custom key
 ```
 
 #### **`render()`**
+
 Render the achievement UI (called automatically)
+
 ```javascript
 achievements.render();
 ```
 
 #### **`showHint(achievementId)`**
+
 Toggle hint display for hidden achievements
+
 ```javascript
-achievements.showHint('secret_finder');
+achievements.showHint("secret_finder");
 ```
 
 ---
@@ -210,15 +242,18 @@ achievements.showHint('secret_finder');
 ## **AchievementManager Class** (Game Integration)
 
 ### **Constructor**
+
 ```javascript
-new AchievementManager(gameInstance, options = {})
+new AchievementManager(gameInstance, (options = {}));
 ```
 
 **Parameters:**
+
 - `gameInstance` - Reference to your main game object
 - `options` - Configuration object
 
 **Options:**
+
 ```javascript
 {
   enableAutoCheck: true,          // Auto-check achievements
@@ -230,48 +265,61 @@ new AchievementManager(gameInstance, options = {})
 ### **Integration Methods**
 
 #### **`initializeAchievements(containerSelector, achievementData, options)`**
+
 Set up the complete achievement system
+
 ```javascript
-achievementManager.initializeAchievements(
-  '#achievements', 
-  GAME_ACHIEVEMENTS,
-  { enableNotifications: true }
-);
+achievementManager.initializeAchievements("#achievements", GAME_ACHIEVEMENTS, {
+  enableNotifications: true,
+});
 ```
 
 #### **`updateGameStat(statName, value)`**
+
 Update a tracked game statistic
+
 ```javascript
-achievementManager.updateGameStat('enemiesKilled', enemyCount);
-achievementManager.updateGameStat('level', 5);
+achievementManager.updateGameStat("enemiesKilled", enemyCount);
+achievementManager.updateGameStat("level", 5);
 ```
 
 #### **`incrementGameStat(statName, amount)`**
+
 Increment a statistic by amount
+
 ```javascript
-achievementManager.incrementGameStat('wins'); // +1
-achievementManager.incrementGameStat('score', 100); // +100
+achievementManager.incrementGameStat("wins"); // +1
+achievementManager.incrementGameStat("score", 100); // +100
 ```
 
 #### **`onGameEvent(eventName, eventData)`**
+
 Handle game events for achievement triggers
+
 ```javascript
-achievementManager.onGameEvent('levelCompleted', { 
-  time: 120, 
-  perfectRun: true 
+achievementManager.onGameEvent("levelCompleted", {
+  time: 120,
+  perfectRun: true,
 });
 ```
 
 #### **`registerCustomChecker(achievementId, checkerFunction)`**
+
 Register complex achievement logic
+
 ```javascript
-achievementManager.registerCustomChecker('perfectionist', (stats, achievement) => {
-  return stats.deaths === 0 && stats.level >= 10 && stats.score >= 50000;
-});
+achievementManager.registerCustomChecker(
+  "perfectionist",
+  (stats, achievement) => {
+    return stats.deaths === 0 && stats.level >= 10 && stats.score >= 50000;
+  }
+);
 ```
 
 #### **`checkAllAchievements()`**
+
 Manually trigger achievement checking
+
 ```javascript
 achievementManager.checkAllAchievements();
 ```
@@ -279,19 +327,25 @@ achievementManager.checkAllAchievements();
 ### **Convenience Methods**
 
 #### **`unlockAchievement(achievementId)`**
+
 Direct achievement unlock
+
 ```javascript
-achievementManager.unlockAchievement('special_event');
+achievementManager.unlockAchievement("special_event");
 ```
 
 #### **`updateAchievementProgress(achievementId, value)`**
+
 Direct progress update
+
 ```javascript
-achievementManager.updateAchievementProgress('collector', itemCount);
+achievementManager.updateAchievementProgress("collector", itemCount);
 ```
 
 #### **`getAchievementStats()`**
+
 Get achievement system statistics
+
 ```javascript
 const stats = achievementManager.getAchievementStats();
 // { totalPoints: 150, completionPercentage: 75, unlockedCount: 3, totalCount: 4 }
@@ -300,14 +354,18 @@ const stats = achievementManager.getAchievementStats();
 ### **System Control**
 
 #### **`startAutoCheck()` / `stopAutoCheck()`**
+
 Control automatic achievement checking
+
 ```javascript
 achievementManager.startAutoCheck();
 achievementManager.stopAutoCheck();
 ```
 
 #### **`saveAchievements()` / `loadAchievements()` / `resetAchievements()`**
+
 Achievement data management
+
 ```javascript
 achievementManager.saveAchievements();
 achievementManager.loadAchievements();
@@ -319,57 +377,67 @@ achievementManager.resetAchievements();
 ## 🎯 **Integration Examples**
 
 ### **With Vanilla JS Game**
+
 ```javascript
 class MyGame {
   constructor() {
     this.gameState = { wins: 0, enemiesKilled: 0 };
     this.setupAchievements();
   }
-  
+
   async setupAchievements() {
     this.achievementManager = new AchievementManager(this);
-    this.achievementManager.initializeAchievements('#achievements', GAME_ACHIEVEMENTS);
+    this.achievementManager.initializeAchievements(
+      "#achievements",
+      GAME_ACHIEVEMENTS
+    );
     this.achievementManager.setGameStats(this.gameState);
   }
-  
+
   onEnemyKilled() {
     this.gameState.enemiesKilled++;
-    this.achievementManager.updateGameStat('enemiesKilled', this.gameState.enemiesKilled);
+    this.achievementManager.updateGameStat(
+      "enemiesKilled",
+      this.gameState.enemiesKilled
+    );
   }
-  
+
   onLevelComplete() {
-    this.achievementManager.onGameEvent('levelComplete', { 
+    this.achievementManager.onGameEvent("levelComplete", {
       time: this.levelTime,
-      score: this.score 
+      score: this.score,
     });
   }
 }
 ```
 
 ### **With Your Ice Cream Fighter Pattern**
+
 ```javascript
 class IceCreamFighterAchievements extends AchievementManager {
   constructor(game) {
     super(game, { enableDebugLogs: true });
     this.setupIceCreamAchievements();
   }
-  
+
   setupIceCreamAchievements() {
     // Register custom achievements
-    this.registerCustomChecker('ice_master', (stats) => {
+    this.registerCustomChecker("ice_master", (stats) => {
       return stats.battlesWon >= 5 && stats.totalDamage >= 1000;
     });
-    
-    this.registerCustomChecker('speed_runner', (stats) => {
-      return stats.lastEvent === 'battleWon' && 
-             stats.lastEventData.time < 30;
+
+    this.registerCustomChecker("speed_runner", (stats) => {
+      return stats.lastEvent === "battleWon" && stats.lastEventData.time < 30;
     });
   }
 }
 
 // In your main game
 this.achievementManager = new IceCreamFighterAchievements(this);
-this.achievementManager.initializeAchievements('#achievements', ICE_CREAM_ACHIEVEMENTS);
+this.achievementManager.initializeAchievements(
+  "#achievements",
+  ICE_CREAM_ACHIEVEMENTS
+);
 ```
 
 ---
@@ -377,22 +445,25 @@ this.achievementManager.initializeAchievements('#achievements', ICE_CREAM_ACHIEV
 ## ⚙️ **Configuration Options**
 
 ### **Achievement System Options**
+
 ```javascript
 const options = {
   // Core settings
-  storageKey: 'myGame_achievements',
+  storageKey: "myGame_achievements",
   enableNotifications: true,
   autoSave: true,
-  
-  // Manager settings  
+
+  // Manager settings
   enableAutoCheck: true,
   checkInterval: 2000,
-  enableDebugLogs: true
+  enableDebugLogs: true,
 };
 ```
 
 ### **CSS Customization**
+
 The CSS uses CSS variables for easy theming:
+
 ```css
 :root {
   --achievement-primary-color: #48dbfb;
@@ -407,14 +478,16 @@ The CSS uses CSS variables for easy theming:
 ## 🎨 **Styling**
 
 ### **CSS Classes Available**
+
 - `.achievement-item` - Individual achievement
 - `.achievement-item.unlocked` - Unlocked state
-- `.achievement-item.locked` - Locked state  
+- `.achievement-item.locked` - Locked state
 - `.achievement-item.hidden` - Hidden achievement
 - `.achievement-progress-bar` - Progress bar container
 - `.achievement-notification` - Notification popup
 
 ### **Custom Styling Example**
+
 ```css
 /* Custom achievement theme */
 .achievement-item.unlocked {
@@ -432,41 +505,49 @@ The CSS uses CSS variables for easy theming:
 ## 🔧 **Advanced Usage**
 
 ### **Custom Achievement Types**
+
 ```javascript
 // Stat-based achievement
 const statAchievement = {
-  id: "high_scorer", 
+  id: "high_scorer",
   name: "High Scorer",
   description: "Reach 10,000 points",
   icon: "📈",
   points: 30,
-  progress: { target: 10000, current: 0 }
+  progress: { target: 10000, current: 0 },
 };
 
-// Event-based achievement  
-achievementManager.registerCustomChecker('combo_master', (stats) => {
-  return stats.lastEvent === 'comboCompleted' && 
-         stats.lastEventData.comboSize >= 10;
+// Event-based achievement
+achievementManager.registerCustomChecker("combo_master", (stats) => {
+  return (
+    stats.lastEvent === "comboCompleted" && stats.lastEventData.comboSize >= 10
+  );
 });
 
 // Time-based achievement
-achievementManager.registerCustomChecker('speed_demon', (stats) => {
-  return stats.lastEvent === 'raceFinished' && 
-         stats.lastEventData.time < 60;
+achievementManager.registerCustomChecker("speed_demon", (stats) => {
+  return stats.lastEvent === "raceFinished" && stats.lastEventData.time < 60;
 });
 ```
 
 ### **Achievement Categories** (Future Enhancement)
+
 ```javascript
 // While not implemented yet, you can organize achievements:
-const COMBAT_ACHIEVEMENTS = { /* combat achievements */ };
-const EXPLORATION_ACHIEVEMENTS = { /* exploration achievements */ };
-const SECRET_ACHIEVEMENTS = { /* hidden achievements */ };
+const COMBAT_ACHIEVEMENTS = {
+  /* combat achievements */
+};
+const EXPLORATION_ACHIEVEMENTS = {
+  /* exploration achievements */
+};
+const SECRET_ACHIEVEMENTS = {
+  /* hidden achievements */
+};
 
 const ALL_ACHIEVEMENTS = {
   ...COMBAT_ACHIEVEMENTS,
-  ...EXPLORATION_ACHIEVEMENTS, 
-  ...SECRET_ACHIEVEMENTS
+  ...EXPLORATION_ACHIEVEMENTS,
+  ...SECRET_ACHIEVEMENTS,
 };
 ```
 
@@ -477,33 +558,36 @@ const ALL_ACHIEVEMENTS = {
 ### **Common Issues**
 
 **Achievement container not found**
+
 ```javascript
 // ❌ Wrong - element doesn't exist
-new Achievements('#nonexistent-container', {});
+new Achievements("#nonexistent-container", {});
 
 // ✅ Correct - ensure element exists
-const container = document.querySelector('#achievements');
+const container = document.querySelector("#achievements");
 if (container) {
-  const achievements = new Achievements('#achievements', {});
+  const achievements = new Achievements("#achievements", {});
 }
 ```
 
 **Achievements not unlocking**
+
 ```javascript
 // ❌ Wrong - checking before initialization
-achievementManager.unlockAchievement('test'); // Will fail
+achievementManager.unlockAchievement("test"); // Will fail
 
 // ✅ Correct - wait for initialization
-achievementManager.initializeAchievements('#container', data);
-achievementManager.unlockAchievement('test'); // Works
+achievementManager.initializeAchievements("#container", data);
+achievementManager.unlockAchievement("test"); // Works
 ```
 
 **Progress not updating**
+
 ```javascript
 // ❌ Wrong - progress achievement without progress property
 {
   id: "collector",
-  name: "Collector", 
+  name: "Collector",
   // Missing progress property
 }
 
@@ -516,17 +600,19 @@ achievementManager.unlockAchievement('test'); // Works
 ```
 
 **Notifications not showing**
+
 ```javascript
 // Check if notifications are enabled
-const achievements = new Achievements('#container', {
-  enableNotifications: true // Make sure this is true
+const achievements = new Achievements("#container", {
+  enableNotifications: true, // Make sure this is true
 });
 ```
 
 ### **Debug Mode**
+
 ```javascript
 const achievementManager = new AchievementManager(game, {
-  enableDebugLogs: true // Enable console logging
+  enableDebugLogs: true, // Enable console logging
 });
 ```
 
@@ -535,12 +621,13 @@ const achievementManager = new AchievementManager(game, {
 ## 📱 **Browser Support**
 
 - ✅ **Chrome 60+**
-- ✅ **Firefox 55+** 
+- ✅ **Firefox 55+**
 - ✅ **Safari 12+**
 - ✅ **Edge 79+**
 - ✅ **Mobile browsers** (iOS Safari, Chrome Mobile)
 
 **Features used:**
+
 - ES6 Classes
 - CSS Grid and Flexbox
 - localStorage
@@ -551,6 +638,7 @@ const achievementManager = new AchievementManager(game, {
 ## 🔮 **Future Enhancements**
 
 ### **Planned Features:**
+
 - [ ] Achievement categories and filtering
 - [ ] Sound integration for different rarities
 - [ ] Social sharing functionality
@@ -559,6 +647,7 @@ const achievementManager = new AchievementManager(game, {
 - [ ] Achievement analytics and metrics
 
 ### **Contributing:**
+
 This is a personal toolkit component. If you extend it for your projects, feel free to share improvements!
 
 ---

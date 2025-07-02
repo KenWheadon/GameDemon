@@ -2,7 +2,11 @@
 
 /* CSS Variables for easy theming */
 :root {
-  --drawer-background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+  --drawer-background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.95),
+    rgba(118, 75, 162, 0.95)
+  );
   --drawer-border-color: rgba(255, 255, 255, 0.2);
   --drawer-icon-background: rgba(255, 255, 255, 0.2);
   --drawer-icon-border: rgba(255, 255, 255, 0.3);
@@ -32,11 +36,12 @@
   backdrop-filter: blur(15px);
   border: 2px solid var(--drawer-border-color);
   box-shadow: 0 20px 40px var(--drawer-shadow);
-  transition: transform var(--drawer-transition-speed) var(--drawer-transition-easing);
+  transition: transform var(--drawer-transition-speed)
+    var(--drawer-transition-easing);
   pointer-events: auto;
   overflow: hidden;
   color: var(--drawer-text-color);
-  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-family: "Comic Sans MS", cursive, sans-serif;
 }
 
 /* Side-specific positioning and transforms */
@@ -207,11 +212,13 @@
 }
 
 .drawer-slide-in {
-  animation: slideIn var(--drawer-transition-speed) var(--drawer-transition-easing);
+  animation: slideIn var(--drawer-transition-speed)
+    var(--drawer-transition-easing);
 }
 
 .drawer-slide-out {
-  animation: slideOut var(--drawer-transition-speed) var(--drawer-transition-easing);
+  animation: slideOut var(--drawer-transition-speed)
+    var(--drawer-transition-easing);
 }
 
 /* Keyframe Animations */
@@ -264,17 +271,17 @@
     width: 90vw !important;
     max-width: 350px;
   }
-  
+
   .drawer-top,
   .drawer-bottom {
     height: 80vh !important;
     max-height: 400px;
   }
-  
+
   .drawer-content {
     padding: 15px;
   }
-  
+
   .drawer-icon {
     width: 45px;
     height: 45px;
@@ -287,22 +294,22 @@
   .drawer-right {
     width: 95vw !important;
   }
-  
+
   .drawer-top,
   .drawer-bottom {
     height: 75vh !important;
   }
-  
+
   .drawer-content {
     padding: 12px;
   }
-  
+
   .drawer-icon {
     width: 40px;
     height: 40px;
     font-size: 18px;
   }
-  
+
   .drawer-close-button {
     width: 25px;
     height: 25px;
@@ -318,12 +325,12 @@
     border: 3px solid white;
     background: rgba(0, 0, 0, 0.9);
   }
-  
+
   .drawer-icon {
     border: 3px solid white;
     background: rgba(0, 0, 0, 0.8);
   }
-  
+
   .drawer-close-button {
     border: 2px solid white;
     background: rgba(0, 0, 0, 0.8);
@@ -338,18 +345,19 @@
   .drawer-backdrop {
     transition: none;
   }
-  
+
   .drawer-icon:hover {
     transform: none;
   }
-  
+
   .drawer-close-button:hover {
     transform: none;
   }
-  
+
   @keyframes slideIn,
   @keyframes slideOut {
-    from, to {
+    from,
+    to {
       opacity: 1;
       transform: none;
     }
@@ -377,7 +385,11 @@
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   :root {
-    --drawer-background: linear-gradient(135deg, rgba(52, 73, 154, 0.95), rgba(78, 56, 122, 0.95));
+    --drawer-background: linear-gradient(
+      135deg,
+      rgba(52, 73, 154, 0.95),
+      rgba(78, 56, 122, 0.95)
+    );
     --drawer-border-color: rgba(255, 255, 255, 0.3);
     --drawer-icon-background: rgba(255, 255, 255, 0.1);
   }
@@ -386,26 +398,46 @@
 /* Light Mode Support */
 @media (prefers-color-scheme: light) {
   :root {
-    --drawer-background: linear-gradient(135deg, rgba(102, 126, 234, 0.98), rgba(118, 75, 162, 0.98));
+    --drawer-background: linear-gradient(
+      135deg,
+      rgba(102, 126, 234, 0.98),
+      rgba(118, 75, 162, 0.98)
+    );
     --drawer-text-color: white;
   }
 }
 
 /* Custom Theme Classes (Optional) */
 .drawer-theme-achievement {
-  --drawer-background: linear-gradient(135deg, rgba(72, 219, 251, 0.95), rgba(10, 189, 227, 0.95));
+  --drawer-background: linear-gradient(
+    135deg,
+    rgba(72, 219, 251, 0.95),
+    rgba(10, 189, 227, 0.95)
+  );
 }
 
 .drawer-theme-inventory {
-  --drawer-background: linear-gradient(135deg, rgba(253, 203, 110, 0.95), rgba(230, 126, 34, 0.95));
+  --drawer-background: linear-gradient(
+    135deg,
+    rgba(253, 203, 110, 0.95),
+    rgba(230, 126, 34, 0.95)
+  );
 }
 
 .drawer-theme-stats {
-  --drawer-background: linear-gradient(135deg, rgba(0, 184, 148, 0.95), rgba(0, 160, 133, 0.95));
+  --drawer-background: linear-gradient(
+    135deg,
+    rgba(0, 184, 148, 0.95),
+    rgba(0, 160, 133, 0.95)
+  );
 }
 
 .drawer-theme-custom {
-  --drawer-background: linear-gradient(135deg, rgba(155, 89, 182, 0.95), rgba(142, 68, 173, 0.95));
+  --drawer-background: linear-gradient(
+    135deg,
+    rgba(155, 89, 182, 0.95),
+    rgba(142, 68, 173, 0.95)
+  );
 }
 
 /* Animation Performance Optimizations */
