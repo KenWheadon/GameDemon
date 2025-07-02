@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory System Test - GameDemon Toolkit</title>
+    <link rel="stylesheet" href="inventory.css" />
+    <style>
+      /* Test page specific styles */
+      body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        color: white;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .test-header {
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .test-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        background: linear-gradient(45deg, #74b9ff, #00cec9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .test-subtitle {
+        font-size: 16px;
+        opacity: 0.8;
+        margin: 0;
+      }
+
+      .test-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .test-btn {
+        background: rgba(116, 185, 255, 0.2);
+        border: 1px solid rgba(116, 185, 255, 0.3);
+        color: white;
+        padding: 10px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(5px);
+      }
+
+      .test-btn:hover {
+        background: rgba(116, 185, 255, 0.3);
+        border-color: rgba(116, 185, 255, 0.5);
+        transform: translateY(-1px);
+      }
+
+      .test-btn.primary {
+        background: #74b9ff;
+        border-color: #74b9ff;
+      }
+
+      .test-btn.primary:hover {
+        background: #0984e3;
+        border-color: #0984e3;
+      }
+
+      .test-content {
+        padding: 20px;
+        text-align: center;
+      }
+
+      .test-info {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 600px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .test-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 16px;
+        margin: 20px 0;
+      }
+
+      .test-stat {
+        text-align: center;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .test-stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #74b9ff;
+        margin-bottom: 4px;
+      }
+
+      .test-stat-label {
+        font-size: 12px;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .test-log {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        max-height: 200px;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        overflow-y: auto;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        z-index: 10000;
+        opacity: 0;
+        transform: translateY(100%);
+        transition: all 0.3s ease;
+      }
+
+      .test-log.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .test-log-entry {
+        margin: 4px 0;
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+
+      .test-log-entry.info {
+        color: #74b9ff;
+        background: rgba(116, 185, 255, 0.1);
+      }
+
+      .test-log-entry.success {
+        color: #00b894;
+        background: rgba(0, 184, 148, 0.1);
+      }
+
+      .test-log-entry.warning {
+        color: #fdcb6e;
+        background: rgba(253, 203, 110, 0.1);
+      }
+
+      .test-log-entry.error {
+        color: #e17055;
+        background: rgba(225, 112, 85, 0.1);
+      }
+
+      /* Mobile adjustments */
+      @media (max-width: 768px) {
+        .test-controls {
+          flex-direction: column;
+        }
+
+        .test-btn {
+          width: 100%;
+          text-align: center;
+        }
+
+        .test-log {
+          left: 10px;
+          right: 10px;
+          bottom: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Test Header -->
+    <div class="test-header">
+      <h1 class="test-title">🎒 Inventory System Test</h1>
+      <p class="test-subtitle">GameDemon Toolkit - Interactive Demo</p>
+    </div>
+
+    <!-- Test Controls -->
+    <div class="test-controls">
+      <button class="test-btn primary" id="toggle-inventory">
+        Toggle Inventory
+      </button>
+      <button class="test-btn" id="add-random-item">Add Random Item</button>
+      <button class="test-btn" id="add-rare-item">Add Rare Item</button>
+      <button class="test-btn" id="add-legendary-item">
+        Add Legendary Item
+      </button>
+      <button class="test-btn" id="fill-inventory">Fill Inventory</button>
+      <button class="test-btn" id="clear-inventory">Clear Inventory</button>
+      <button class="test-btn" id="sort-inventory">Sort by Rarity</button>
+      <button class="test-btn" id="test-filters">Test Filters</button>
+      <button class="test-btn" id="toggle-log">Toggle Log</button>
+    </div>
+
+    <!-- Test Content -->
+    <div class="test-content">
+      <div class="test-info">
+        <h3>📋 Test Instructions</h3>
+        <p>
+          Use the buttons above to test inventory features. The inventory
+          supports:
+        </p>
+        <ul style="text-align: left; max-width: 500px; margin: 0 auto">
+          <li><strong>Drag & Drop:</strong> Drag items between slots</li>
+          <li><strong>Context Menu:</strong> Right-click items for options</li>
+          <li><strong>Tooltips:</strong> Hover over items for details</li>
+          <li>
+            <strong>Filtering:</strong> Use the filter buttons in inventory
+          </li>
+          <li><strong>Search:</strong> Type in the search box</li>
+          <li>
+            <strong>Bulk Operations:</strong> Hold Ctrl/Cmd to select multiple
+          </li>
+          <li><strong>Keyboard:</strong> Use arrow keys to navigate</li>
+        </ul>
+      </div>
+
+      <div class="test-stats" id="test-stats">
+        <div class="test-stat">
+          <div class="test-stat-value" id="stat-items">0</div>
+          <div class="test-stat-label">Items</div>
+        </div>
+        <div class="test-stat">
+          <div class="test-stat-value" id="stat-slots">0/40</div>
+          <div class="test-stat-label">Slots</div>
+        </div>
+        <div class="test-stat">
+          <div class="test-stat-value" id="stat-value">0</div>
+          <div class="test-stat-label">Total Value</div>
+        </div>
+        <div class="test-stat">
+          <div class="test-stat-value" id="stat-rarest">None</div>
+          <div class="test-stat-label">Rarest Item</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log Window -->
+    <div class="test-log" id="test-log">
+      <div class="test-log-entry info">Inventory Test Console - Ready</div>
+    </div>
+
+    <!-- Include the JavaScript files -->
+    <script src="Inventory-Item.js"></script>
+    <script src="Inventory-Manager.js"></script>
+
+    <script>
+      // Test application
+      class InventoryTest {
+        constructor() {
+          this.inventory = null;
+          this.logVisible = false;
+          this.testStats = {
+            itemsAdded: 0,
+            itemsRemoved: 0,
+            operations: 0,
+          };
+
+          this.init();
+        }
+
+        async init() {
+          this.log("Initializing Inventory Test...", "info");
+
+          // Create mock game instance
+          const mockGame = {
+            gameId: "inventory-test",
+            audioManager: null,
+            achievementManager: null,
+          };
+
+          // Initialize inventory manager
+          this.inventory = new InventoryManager(mockGame, {
+            maxSlots: 40,
+            enableDebugLogs: true,
+            autoStack: true,
+            enableAnimations: true,
+            enableSounds: false, // Disabled for test
+          });
+
+          // Set up event listeners
+          this.setupEventListeners();
+          this.setupInventoryEvents();
+
+          // Create UI
+          this.createInventoryUI();
+
+          this.log("Inventory Test initialized successfully!", "success");
+          this.updateTestStats();
+        }
+
+        setupEventListeners() {
+          document
+            .getElementById("toggle-inventory")
+            .addEventListener("click", () => {
+              this.toggleInventory();
+            });
+
+          document
+            .getElementById("add-random-item")
+            .addEventListener("click", () => {
+              this.addRandomItem();
+            });
+
+          document
+            .getElementById("add-rare-item")
+            .addEventListener("click", () => {
+              this.addRareItem();
+            });
+
+          document
+            .getElementById("add-legendary-item")
+            .addEventListener("click", () => {
+              this.addLegendaryItem();
+            });
+
+          document
+            .getElementById("fill-inventory")
+            .addEventListener("click", () => {
+              this.fillInventory();
+            });
+
+          document
+            .getElementById("clear-inventory")
+            .addEventListener("click", () => {
+              this.clearInventory();
+            });
+
+          document
+            .getElementById("sort-inventory")
+            .addEventListener("click", () => {
+              this.inventory.sortInventory("rarity", false);
+            });
+
+          document
+            .getElementById("test-filters")
+            .addEventListener("click", () => {
+              this.testFilters();
+            });
+
+          document
+            .getElementById("toggle-log")
+            .addEventListener("click", () => {
+              this.toggleLog();
+            });
+        }
+
+        setupInventoryEvents() {
+          // Listen for inventory events
+          document.addEventListener("inventory:item-added", (e) => {
+            this.log(`Item added: ${e.detail.item.name}`, "success");
+            this.testStats.itemsAdded++;
+            this.updateTestStats();
+          });
+
+          document.addEventListener("inventory:item-removed", (e) => {
+            this.log(`Item removed: ${e.detail.item.name}`, "warning");
+            this.testStats.itemsRemoved++;
+            this.updateTestStats();
+          });
+
+          document.addEventListener("inventory:item-used", (e) => {
+            this.log(`Item used: ${e.detail.item.name}`, "info");
+            this.updateTestStats();
+          });
+
+          document.addEventListener("inventory:sorted", (e) => {
+            this.log(`Inventory sorted by ${e.detail.sortBy}`, "info");
+          });
+
+          document.addEventListener("inventory:filtered", (e) => {
+            this.log(`Inventory filtered: ${e.detail.filter}`, "info");
+          });
+
+          document.addEventListener("inventory:full", () => {
+            this.log("Inventory is full!", "error");
+          });
+
+          document.addEventListener("inventory:error", (e) => {
+            this.log(`Error: ${e.detail.message}`, "error");
+          });
+        }
+
+        createInventoryUI() {
+          // Create the main inventory container
+          const container = document.createElement("div");
+          container.className = "inventory-container";
+          container.id = "inventory-container";
+
+          container.innerHTML = `
+                    <div class="inventory-header">
+                        <h2 class="inventory-title">Inventory</h2>
+                        <div class="inventory-stats">
+                            <div class="inventory-stat">
+                                <div class="inventory-stat-value" id="inv-items">0</div>
+                                <div class="inventory-stat-label">Items</div>
+                            </div>
+                            <div class="inventory-stat">
+                                <div class="inventory-stat-value" id="inv-value">0</div>
+                                <div class="inventory-stat-label">Value</div>
+                            </div>
+                        </div>
+                        <button class="inventory-close" id="close-inventory">×</button>
+                    </div>
+                    <div class="inventory-controls">
+                        <div class="inventory-search">
+                            <span class="inventory-search-icon">🔍</span>
+                            <input type="text" placeholder="Search items..." id="inventory-search">
+                        </div>
+                        <div class="inventory-filters">
+                            <button class="inventory-filter-btn active" data-filter="all">All</button>
+                            <button class="inventory-filter-btn" data-filter="weapon">Weapons</button>
+                            <button class="inventory-filter-btn" data-filter="armor">Armor</button>
+                            <button class="inventory-filter-btn" data-filter="consumable">Consumables</button>
+                            <button class="inventory-filter-btn" data-filter="misc">Misc</button>
+                        </div>
+                    </div>
+                    <div class="inventory-content">
+                        <div class="inventory-grid" id="inventory-grid">
+                            ${this.generateSlotHTML()}
+                        </div>
+                    </div>
+                `;
+
+          document.body.appendChild(container);
+
+          // Set up UI event listeners
+          this.setupUIEvents();
+        }
+
+        generateSlotHTML() {
+          let html = "";
+          for (let i = 0; i < 40; i++) {
+            html += `<div class="inventory-slot" data-slot="${i}" tabindex="0"></div>`;
+          }
+          return html;
+        }
+
+        setupUIEvents() {
+          // Close button
+          document
+            .getElementById("close-inventory")
+            .addEventListener("click", () => {
+              this.hideInventory();
+            });
+
+          // Search functionality
+          document
+            .getElementById("inventory-search")
+            .addEventListener("input", (e) => {
+              this.inventory.searchInventory(e.target.value);
+            });
+
+          // Filter buttons
+          document.querySelectorAll(".inventory-filter-btn").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              // Update active state
+              document
+                .querySelectorAll(".inventory-filter-btn")
+                .forEach((b) => b.classList.remove("active"));
+              e.target.classList.add("active");
+
+              // Apply filter
+              this.inventory.filterInventory(e.target.dataset.filter);
+            });
+          });
+
+          // Slot interactions
+          this.setupSlotEvents();
+        }
+
+        setupSlotEvents() {
+          const slots = document.querySelectorAll(".inventory-slot");
+
+          slots.forEach((slot, index) => {
+            // Click handler
+            slot.addEventListener("click", (e) => {
+              if (e.ctrlKey || e.metaKey) {
+                this.toggleSlotSelection(index);
+              } else {
+                this.selectSlot(index);
+              }
+            });
+
+            // Context menu
+            slot.addEventListener("contextmenu", (e) => {
+              e.preventDefault();
+              this.showContextMenu(e, index);
+            });
+
+            // Drag and drop
+            this.setupDragDrop(slot, index);
+
+            // Keyboard navigation
+            slot.addEventListener("keydown", (e) => {
+              this.handleKeyboard(e, index);
+            });
+          });
+        }
+
+        setupDragDrop(slot, index) {
+          slot.addEventListener("dragstart", (e) => {
+            const item = this.inventory.slots[index];
+            if (item) {
+              e.dataTransfer.setData("text/plain", index.toString());
+              slot.classList.add("drag-source");
+              this.log(`Started dragging: ${item.name}`, "info");
+            }
+          });
+
+          slot.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            slot.classList.add("drag-over");
+          });
+
+          slot.addEventListener("dragleave", () => {
+            slot.classList.remove("drag-over");
+          });
+
+          slot.addEventListener("drop", (e) => {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+            slot.classList.remove("drag-over");
+
+            if (fromIndex !== index) {
+              const success = this.inventory.moveItem(fromIndex, index);
+              if (success) {
+                this.log(
+                  `Moved item from slot ${fromIndex} to ${index}`,
+                  "success"
+                );
+              }
+            }
+
+            // Clean up drag state
+            document.querySelectorAll(".inventory-slot").forEach((s) => {
+              s.classList.remove("drag-source");
+            });
+          });
+
+          slot.addEventListener("dragend", () => {
+            slot.classList.remove("drag-source");
+          });
+        }
+
+        toggleInventory() {
+          const container = document.getElementById("inventory-container");
+          if (container.classList.contains("visible")) {
+            this.hideInventory();
+          } else {
+            this.showInventory();
+          }
+        }
+
+        showInventory() {
+          const container = document.getElementById("inventory-container");
+          container.classList.add("visible");
+          this.refreshInventoryUI();
+          this.log("Inventory opened", "info");
+        }
+
+        hideInventory() {
+          const container = document.getElementById("inventory-container");
+          container.classList.remove("visible");
+          this.log("Inventory closed", "info");
+        }
+
+        refreshInventoryUI() {
+          const slots = document.querySelectorAll(".inventory-slot");
+
+          slots.forEach((slot, index) => {
+            const item = this.inventory.slots[index];
+
+            if (item) {
+              slot.innerHTML = `
+                            <div class="inventory-item rarity-${
+                              item.rarity
+                            }" draggable="true">
+                                <div class="inventory-item-icon" style="background: linear-gradient(45deg, ${this.getRarityColor(
+                                  item.rarity
+                                )}, transparent); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px;">${this.getItemEmoji(
+                item.type
+              )}</div>
+                                ${
+                                  item.quantity > 1
+                                    ? `<div class="inventory-item-quantity">${item.quantity}</div>`
+                                    : ""
+                                }
+                                ${
+                                  item.durability !== null
+                                    ? `<div class="inventory-item-durability"><div class="inventory-item-durability-bar" style="width: ${
+                                        (item.durability / item.maxDurability) *
+                                        100
+                                      }%"></div></div>`
+                                    : ""
+                                }
+                                ${
+                                  item.equipped
+                                    ? '<div class="inventory-item-equipped"></div>'
+                                    : ""
+                                }
+                                ${
+                                  item.locked
+                                    ? '<div class="inventory-item-locked">🔒</div>'
+                                    : ""
+                                }
+                                ${
+                                  item.favorite
+                                    ? '<div class="inventory-item-favorite">⭐</div>'
+                                    : ""
+                                }
+                            </div>
+                        `;
+
+              // Add tooltip
+              slot.title = this.generateTooltip(item);
+            } else {
+              slot.innerHTML = "";
+              slot.title = "";
+            }
+          });
+
+          // Update inventory stats
+          const stats = this.inventory.getStats();
+          document.getElementById("inv-items").textContent = stats.totalItems;
+          document.getElementById("inv-value").textContent = stats.totalValue;
+        }
+
+        generateTooltip(item) {
+          return `${item.name}\n${item.description}\nRarity: ${
+            item.rarity
+          }\nValue: ${item.value}${
+            item.durability !== null
+              ? `\nDurability: ${item.durability}/${item.maxDurability}`
+              : ""
+          }`;
+        }
+
+        getRarityColor(rarity) {
+          const colors = {
+            common: "#ffffff",
+            uncommon: "#1eff00",
+            rare: "#0070dd",
+            epic: "#a335ee",
+            legendary: "#ff8000",
+            artifact: "#e6cc80",
+          };
+          return colors[rarity] || colors.common;
+        }
+
+        getItemEmoji(type) {
+          const emojis = {
+            weapon: "⚔️",
+            armor: "🛡️",
+            consumable: "🧪",
+            misc: "📦",
+            quest: "📜",
+          };
+          return emojis[type] || "📦";
+        }
+
+        addRandomItem() {
+          const templates = [
+            "health_potion",
+            "iron_sword",
+            "leather_armor",
+            "basic_item",
+          ];
+          const template =
+            templates[Math.floor(Math.random() * templates.length)];
+
+          const success = this.inventory.addItem(template);
+          if (success) {
+            this.refreshInventoryUI();
+          }
+        }
+
+        addRareItem() {
+          const item = this.inventory.createItem("iron_sword", {
+            rarity: "rare",
+            name: "Rare Iron Sword",
+            stats: { attack: 25, speed: 8 },
+            value: 250,
+          });
+
+          if (item) {
+            const success = this.inventory.addItem(item);
+            if (success) {
+              this.refreshInventoryUI();
+            }
+          }
+        }
+
+        addLegendaryItem() {
+          const item = this.inventory.createItem("iron_sword", {
+            rarity: "legendary",
+            name: "Excalibur",
+            description: "The legendary sword of kings",
+            stats: { attack: 100, speed: 15, critical: 25 },
+            value: 10000,
+            effects: [
+              { type: "glow", description: "Emits a holy light" },
+              { type: "damage_boost", amount: 50 },
+            ],
+          });
+
+          if (item) {
+            const success = this.inventory.addItem(item);
+            if (success) {
+              this.refreshInventoryUI();
+            }
+          }
+        }
+
+        fillInventory() {
+          const templates = [
+            "health_potion",
+            "iron_sword",
+            "leather_armor",
+            "basic_item",
+          ];
+          let added = 0;
+
+          for (let i = 0; i < 40; i++) {
+            if (this.inventory.slots[i] === null) {
+              const template =
+                templates[Math.floor(Math.random() * templates.length)];
+              const success = this.inventory.addItem(template);
+              if (success) added++;
+            }
+          }
+
+          this.log(`Added ${added} items to fill inventory`, "success");
+          this.refreshInventoryUI();
+        }
+
+        clearInventory() {
+          let removed = 0;
+          for (let i = 0; i < this.inventory.slots.length; i++) {
+            if (this.inventory.slots[i] !== null) {
+              this.inventory.removeItem(i);
+              removed++;
+            }
+          }
+
+          this.log(`Removed ${removed} items from inventory`, "warning");
+          this.refreshInventoryUI();
+        }
+
+        testFilters() {
+          const filters = ["all", "weapon", "armor", "consumable", "misc"];
+          let currentFilter = 0;
+
+          const cycleFilter = () => {
+            if (currentFilter < filters.length) {
+              const filter = filters[currentFilter];
+              this.inventory.filterInventory(filter);
+
+              // Update UI button
+              document
+                .querySelectorAll(".inventory-filter-btn")
+                .forEach((btn) => {
+                  btn.classList.toggle("active", btn.dataset.filter === filter);
+                });
+
+              this.log(`Applied filter: ${filter}`, "info");
+              currentFilter++;
+
+              setTimeout(cycleFilter, 1000);
+            }
+          };
+
+          cycleFilter();
+        }
+
+        selectSlot(index) {
+          // Clear previous selections
+          document.querySelectorAll(".inventory-slot").forEach((slot) => {
+            slot.classList.remove("selected");
+          });
+
+          // Select new slot
+          const slot = document.querySelector(`[data-slot="${index}"]`);
+          if (slot) {
+            slot.classList.add("selected");
+            slot.focus();
+          }
+        }
+
+        toggleSlotSelection(index) {
+          const slot = document.querySelector(`[data-slot="${index}"]`);
+          if (slot) {
+            slot.classList.toggle("bulk-selected");
+          }
+        }
+
+        showContextMenu(e, slotIndex) {
+          const item = this.inventory.slots[slotIndex];
+          if (!item) return;
+
+          // Create context menu
+          const menu = document.createElement("div");
+          menu.className = "inventory-context-menu visible";
+          menu.style.left = e.pageX + "px";
+          menu.style.top = e.pageY + "px";
+
+          menu.innerHTML = `
+                    <div class="inventory-context-menu-item" data-action="use">Use Item</div>
+                    <div class="inventory-context-menu-item" data-action="drop">Drop Item</div>
+                    <div class="inventory-context-menu-separator"></div>
+                    <div class="inventory-context-menu-item" data-action="favorite">${
+                      item.favorite ? "Unfavorite" : "Favorite"
+                    }</div>
+                    <div class="inventory-context-menu-item" data-action="lock">${
+                      item.locked ? "Unlock" : "Lock"
+                    }</div>
+                `;
+
+          document.body.appendChild(menu);
+
+          // Handle menu clicks
+          menu.addEventListener("click", (e) => {
+            const action = e.target.dataset.action;
+            if (action) {
+              this.handleContextAction(action, slotIndex);
+            }
+            menu.remove();
+          });
+
+          // Remove menu on outside click
+          setTimeout(() => {
+            document.addEventListener(
+              "click",
+              () => {
+                if (menu.parentNode) {
+                  menu.remove();
+                }
+              },
+              { once: true }
+            );
+          }, 10);
+        }
+
+        handleContextAction(action, slotIndex) {
+          const item = this.inventory.slots[slotIndex];
+          if (!item) return;
+
+          switch (action) {
+            case "use":
+              this.inventory.useItem(slotIndex);
+              break;
+            case "drop":
+              this.inventory.removeItem(slotIndex);
+              break;
+            case "favorite":
+              item.favorite = !item.favorite;
+              this.log(
+                `${item.favorite ? "Favorited" : "Unfavorited"}: ${item.name}`,
+                "info"
+              );
+              break;
+            case "lock":
+              item.locked = !item.locked;
+              this.log(
+                `${item.locked ? "Locked" : "Unlocked"}: ${item.name}`,
+                "info"
+              );
+              break;
+          }
+
+          this.refreshInventoryUI();
+        }
+
+        handleKeyboard(e, slotIndex) {
+          switch (e.key) {
+            case "Enter":
+            case " ":
+              e.preventDefault();
+              this.inventory.useItem(slotIndex);
+              break;
+            case "Delete":
+            case "Backspace":
+              e.preventDefault();
+              this.inventory.removeItem(slotIndex);
+              break;
+            case "ArrowRight":
+              e.preventDefault();
+              this.focusSlot(slotIndex + 1);
+              break;
+            case "ArrowLeft":
+              e.preventDefault();
+              this.focusSlot(slotIndex - 1);
+              break;
+            case "ArrowDown":
+              e.preventDefault();
+              this.focusSlot(slotIndex + 8);
+              break;
+            case "ArrowUp":
+              e.preventDefault();
+              this.focusSlot(slotIndex - 8);
+              break;
+          }
+        }
+
+        focusSlot(index) {
+          if (index >= 0 && index < 40) {
+            const slot = document.querySelector(`[data-slot="${index}"]`);
+            if (slot) {
+              slot.focus();
+            }
+          }
+        }
+
+        updateTestStats() {
+          const stats = this.inventory.getStats();
+
+          document.getElementById("stat-items").textContent = stats.totalItems;
+          document.getElementById(
+            "stat-slots"
+          ).textContent = `${stats.usedSlots}/${stats.totalSlots}`;
+          document.getElementById("stat-value").textContent = stats.totalValue;
+
+          let rarest = "None";
+          if (stats.mostValuableItem) {
+            rarest = stats.mostValuableItem.rarity;
+          }
+          document.getElementById("stat-rarest").textContent = rarest;
+        }
+
+        toggleLog() {
+          const log = document.getElementById("test-log");
+          this.logVisible = !this.logVisible;
+          log.classList.toggle("visible", this.logVisible);
+        }
+
+        log(message, type = "info") {
+          const log = document.getElementById("test-log");
+          const entry = document.createElement("div");
+          entry.className = `test-log-entry ${type}`;
+          entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+
+          log.appendChild(entry);
+          log.scrollTop = log.scrollHeight;
+
+          // Limit log entries
+          const entries = log.querySelectorAll(".test-log-entry");
+          if (entries.length > 100) {
+            entries[0].remove();
+          }
+
+          // Auto-show log for errors
+          if (type === "error" && !this.logVisible) {
+            this.toggleLog();
+          }
+        }
+      }
+
+      // Initialize test when page loads
+      document.addEventListener("DOMContentLoaded", () => {
+        new InventoryTest();
+      });
+    </script>
+  </body>
+</html>
