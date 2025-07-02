@@ -26,18 +26,19 @@ class InventoryManager {
       enableKeyboardShortcuts: true,
       enableBulkOperations: true,
       storageKey: "inventory-data",
-      enableDebugLogs: true, // Enable debug logging by default
+      enableDebugLogs: false,
       ...options,
     };
 
     // Core inventory state
     this.slots = new Array(this.options.maxSlots).fill(null);
     this.selectedSlots = new Set();
-    this.clipboard = null; // For cut/copy operations
+    this.clipboard = null;
 
     // UI state
     this.containerElement = null;
     this.isVisible = false;
+    this.isInitialized = false;
     this.draggedItem = null;
     this.draggedSlot = null;
     this.hoveredSlot = null;
@@ -51,15 +52,17 @@ class InventoryManager {
     // Item templates for creating new items
     this.itemTemplates = new Map();
 
-    // Event listeners storage
+    // Event listeners storage for cleanup
     this.eventListeners = new Map();
 
     // Performance tracking
     this.operationCount = 0;
     this.lastOperation = null;
 
-    // Initialize the system
-    this.init();
+    // Initialize the system - ensure proper async handling
+    this.init().catch((error) => {
+      console.error("Failed to initialize InventoryManager:", error);
+    });
   }
 
   /**
@@ -69,7 +72,7 @@ class InventoryManager {
     try {
       this.log("Initializing InventoryManager...");
 
-      // Load item templates
+      // Load item templates first
       this.loadDefaultItemTemplates();
 
       // Set up game integration
@@ -78,12 +81,12 @@ class InventoryManager {
       }
 
       // Load saved inventory
-      this.loadInventory();
+      await this.loadInventory();
 
-      // Create UI container
-      this.createUI();
+      // Create UI container - this is critical for DOM rendering
+      await this.createUI();
 
-      // Set up event listeners
+      // Set up event listeners only after UI is created
       this.setupEventListeners();
 
       // Set up keyboard shortcuts
@@ -91,8 +94,16 @@ class InventoryManager {
         this.setupKeyboardShortcuts();
       }
 
+      // Mark as initialized and refresh UI
+      this.isInitialized = true;
+      this.updateVisibleSlots();
+      this.refreshUI();
+
       this.log("InventoryManager initialized successfully");
-      this.dispatchEvent("inventory:initialized", { success: true });
+      this.dispatchEvent("inventory:initialized", {
+        success: true,
+        slotsCreated: this.slots.length,
+      });
 
       return true;
     } catch (error) {
@@ -109,7 +120,7 @@ class InventoryManager {
    * Set up game state integration
    */
   setupGameStateIntegration() {
-    if (this.game.state) {
+    if (this.game && this.game.state) {
       // Load inventory from game state
       const savedInventory = this.game.state.get(this.options.gameStateKey);
       if (savedInventory) {
@@ -118,7 +129,7 @@ class InventoryManager {
 
       // Watch for external changes
       this.game.state.watch(this.options.gameStateKey, (newValue) => {
-        if (newValue) {
+        if (newValue && this.isInitialized) {
           this.loadFromData(newValue);
           this.refreshUI();
         }
@@ -162,6 +173,7 @@ class InventoryManager {
         value: 100,
         durability: 100,
         maxDurability: 100,
+        stackable: false,
         stats: { attack: 15, speed: 5 },
       },
       leather_armor: {
@@ -174,6 +186,7 @@ class InventoryManager {
         value: 50,
         durability: 80,
         maxDurability: 80,
+        stackable: false,
         stats: { defense: 8, agility: 2 },
       },
     };
@@ -181,6 +194,8 @@ class InventoryManager {
     Object.entries(defaultTemplates).forEach(([id, template]) => {
       this.addItemTemplate(id, template);
     });
+
+    this.log(`Loaded ${Object.keys(defaultTemplates).length} item templates`);
   }
 
   /**
@@ -225,14 +240,29 @@ class InventoryManager {
         }, quantity: ${quantity}`
       );
 
+      // Ensure system is initialized
+      if (!this.isInitialized) {
+        this.log("System not initialized, deferring item add", "warn");
+        // Try to initialize and retry
+        setTimeout(() => this.addItem(item, quantity, preferredSlot), 100);
+        return false;
+      }
+
       // Create item from template if string provided
       if (typeof item === "string") {
-        item = this.createItem(item, { quantity });
-        if (!item) {
+        const newItem = this.createItem(item, { quantity });
+        if (!newItem) {
           this.log(`Failed to create item from template: ${item}`, "error");
           return false;
         }
+        item = newItem;
         this.log(`Created item: ${item.name} with quantity: ${item.quantity}`);
+      }
+
+      // Validate item
+      if (!item || typeof item !== "object") {
+        this.log("Invalid item provided to addItem", "error");
+        return false;
       }
 
       // Auto-stack if enabled
@@ -245,6 +275,11 @@ class InventoryManager {
           this.saveInventory();
           this.refreshUI();
           this.checkAchievements();
+          this.dispatchEvent("inventory:item-added", {
+            item,
+            slot: -1,
+            stacked: true,
+          });
           return true;
         }
         item = stackResult.remainingItem;
@@ -489,6 +524,8 @@ class InventoryManager {
           matches = false;
         } else if (key === "rarity" && item.rarity !== value) {
           matches = false;
+        } else if (key === "templateId" && item.templateId !== value) {
+          matches = false;
         } else if (key === "minValue" && item.value < value) {
           matches = false;
         } else if (key === "maxValue" && item.value > value) {
@@ -618,31 +655,40 @@ class InventoryManager {
       const item = this.slots[i];
       let visible = true;
 
-      // Apply filter
-      if (this.currentFilter !== "all" && item) {
-        if (this.currentFilter === "equipped" && !item.equipped)
+      // Empty slots are always visible unless we have a search query
+      if (!item) {
+        if (this.searchQuery === "") {
+          visible = true;
+        } else {
           visible = false;
-        else if (
-          this.currentFilter === "consumable" &&
-          item.type !== "consumable"
-        )
-          visible = false;
-        else if (this.currentFilter === "weapon" && item.type !== "weapon")
-          visible = false;
-        else if (this.currentFilter === "armor" && item.type !== "armor")
-          visible = false;
-        else if (
-          this.currentFilter === "misc" &&
-          !["misc", "quest"].includes(item.type)
-        )
-          visible = false;
-      }
+        }
+      } else {
+        // Apply filter
+        if (this.currentFilter !== "all") {
+          if (this.currentFilter === "equipped" && !item.equipped)
+            visible = false;
+          else if (
+            this.currentFilter === "consumable" &&
+            item.type !== "consumable"
+          )
+            visible = false;
+          else if (this.currentFilter === "weapon" && item.type !== "weapon")
+            visible = false;
+          else if (this.currentFilter === "armor" && item.type !== "armor")
+            visible = false;
+          else if (
+            this.currentFilter === "misc" &&
+            !["misc", "quest"].includes(item.type)
+          )
+            visible = false;
+        }
 
-      // Apply search
-      if (this.searchQuery && item) {
-        const searchable =
-          `${item.name} ${item.description} ${item.type}`.toLowerCase();
-        if (!searchable.includes(this.searchQuery)) visible = false;
+        // Apply search
+        if (this.searchQuery && visible) {
+          const searchable =
+            `${item.name} ${item.description} ${item.type}`.toLowerCase();
+          if (!searchable.includes(this.searchQuery)) visible = false;
+        }
       }
 
       if (visible) {
@@ -748,7 +794,7 @@ class InventoryManager {
   /**
    * Load inventory from storage
    */
-  loadInventory() {
+  async loadInventory() {
     try {
       // Try to load from game state first
       if (this.game && this.game.state && this.options.saveToGameState) {
@@ -792,56 +838,91 @@ class InventoryManager {
   // UI MANAGEMENT METHODS
 
   /**
-   * Create the inventory UI
+   * Create the inventory UI - WITH ITEM DETAILS PANEL
    */
-  createUI() {
+  async createUI() {
     try {
+      this.log("Creating inventory UI...");
+
+      // Remove existing container if present
+      const existingContainer = document.getElementById("inventory-container");
+      if (existingContainer) {
+        existingContainer.remove();
+      }
+
       // Create the main inventory container
       const container = document.createElement("div");
       container.className = "inventory-container";
       container.id = "inventory-container";
 
+      // Generate the complete UI structure with item details panel
       container.innerHTML = `
-        <div class="inventory-header">
-          <h2 class="inventory-title">Inventory</h2>
-          <div class="inventory-stats">
-            <div class="inventory-stat">
-              <div class="inventory-stat-value" id="inv-items">0</div>
-              <div class="inventory-stat-label">Items</div>
+        <div class="inventory-layout">
+          <!-- Item Details Panel -->
+          <div class="inventory-details-panel" id="inventory-details-panel">
+            <div class="inventory-details-header">
+              <h3 class="inventory-details-title">Item Details</h3>
             </div>
-            <div class="inventory-stat">
-              <div class="inventory-stat-value" id="inv-value">0</div>
-              <div class="inventory-stat-label">Value</div>
+            <div class="inventory-details-content" id="inventory-details-content">
+              <div class="inventory-details-empty">
+                <div class="inventory-details-empty-icon">👆</div>
+                <div class="inventory-details-empty-text">Click an item to view details</div>
+              </div>
             </div>
           </div>
-          <button class="inventory-close" id="close-inventory">×</button>
-        </div>
-        <div class="inventory-controls">
-          <div class="inventory-search">
-            <span class="inventory-search-icon">🔍</span>
-            <input type="text" placeholder="Search items..." id="inventory-search">
-          </div>
-          <div class="inventory-filters">
-            <button class="inventory-filter-btn active" data-filter="all">All</button>
-            <button class="inventory-filter-btn" data-filter="weapon">Weapons</button>
-            <button class="inventory-filter-btn" data-filter="armor">Armor</button>
-            <button class="inventory-filter-btn" data-filter="consumable">Consumables</button>
-            <button class="inventory-filter-btn" data-filter="misc">Misc</button>
-          </div>
-        </div>
-        <div class="inventory-content">
-          <div class="inventory-grid" id="inventory-grid">
-            ${this.generateSlotHTML()}
+
+          <!-- Main Inventory Panel -->
+          <div class="inventory-main-panel">
+            <div class="inventory-header">
+              <h2 class="inventory-title">Inventory</h2>
+              <div class="inventory-stats">
+                <div class="inventory-stat">
+                  <div class="inventory-stat-value" id="inv-items">0</div>
+                  <div class="inventory-stat-label">Items</div>
+                </div>
+                <div class="inventory-stat">
+                  <div class="inventory-stat-value" id="inv-value">0</div>
+                  <div class="inventory-stat-label">Value</div>
+                </div>
+              </div>
+              <button class="inventory-close" id="close-inventory">×</button>
+            </div>
+            <div class="inventory-controls">
+              <div class="inventory-search">
+                <span class="inventory-search-icon">🔍</span>
+                <input type="text" placeholder="Search items..." id="inventory-search">
+              </div>
+              <div class="inventory-filters">
+                <button class="inventory-filter-btn active" data-filter="all">All</button>
+                <button class="inventory-filter-btn" data-filter="weapon">Weapons</button>
+                <button class="inventory-filter-btn" data-filter="armor">Armor</button>
+                <button class="inventory-filter-btn" data-filter="consumable">Consumables</button>
+                <button class="inventory-filter-btn" data-filter="misc">Misc</button>
+              </div>
+            </div>
+            <div class="inventory-content">
+              <div class="inventory-grid" id="inventory-grid">
+                ${this.generateSlotHTML()}
+              </div>
+            </div>
           </div>
         </div>
       `;
 
+      // Append to body and store reference
       document.body.appendChild(container);
       this.containerElement = container;
 
+      // Wait a tick for DOM to be ready
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       this.log("Inventory UI created successfully");
+      this.log(`Created ${this.options.maxSlots} inventory slots`);
+
+      return true;
     } catch (error) {
       this.log(`Error creating UI: ${error.message}`, "error");
+      throw error;
     }
   }
 
@@ -857,12 +938,19 @@ class InventoryManager {
   }
 
   /**
-   * Set up event listeners
+   * Set up event listeners - FIXED VERSION
    */
   setupEventListeners() {
     try {
-      // Set up UI event listeners after creating UI
+      // Ensure UI exists before setting up events
+      if (!this.containerElement) {
+        this.log("Container element not found when setting up events", "error");
+        return;
+      }
+
+      // Set up UI-specific event listeners
       this.setupUIEvents();
+
       this.log("Event listeners set up successfully");
     } catch (error) {
       this.log(`Error setting up event listeners: ${error.message}`, "error");
@@ -878,7 +966,7 @@ class InventoryManager {
     if (closeBtn) {
       const closeHandler = () => this.hide();
       closeBtn.addEventListener("click", closeHandler);
-      this.eventListeners.set(closeBtn, {
+      this.eventListeners.set("close-inventory", {
         event: "click",
         handler: closeHandler,
       });
@@ -889,14 +977,14 @@ class InventoryManager {
     if (searchInput) {
       const searchHandler = (e) => this.searchInventory(e.target.value);
       searchInput.addEventListener("input", searchHandler);
-      this.eventListeners.set(searchInput, {
+      this.eventListeners.set("inventory-search", {
         event: "input",
         handler: searchHandler,
       });
     }
 
     // Filter buttons
-    document.querySelectorAll(".inventory-filter-btn").forEach((btn) => {
+    document.querySelectorAll(".inventory-filter-btn").forEach((btn, index) => {
       const filterHandler = (e) => {
         // Update active state
         document
@@ -909,7 +997,10 @@ class InventoryManager {
       };
 
       btn.addEventListener("click", filterHandler);
-      this.eventListeners.set(btn, { event: "click", handler: filterHandler });
+      this.eventListeners.set(`filter-${index}`, {
+        event: "click",
+        handler: filterHandler,
+      });
     });
 
     // Set up slot events
@@ -921,37 +1012,62 @@ class InventoryManager {
    */
   setupSlotEvents() {
     const slots = document.querySelectorAll(".inventory-slot");
+    this.log(`Setting up events for ${slots.length} slots`);
 
     slots.forEach((slot, index) => {
-      // Click handler
-      const clickHandler = (e) => {
-        if (e.ctrlKey || e.metaKey) {
-          this.toggleSlotSelection(index);
-        } else {
-          this.selectSlot(index);
+      // Click handler - distinguish between click and drag
+      let isDragging = false;
+      let dragStartTime = 0;
+
+      const mouseDownHandler = (e) => {
+        isDragging = false;
+        dragStartTime = Date.now();
+      };
+
+      const mouseMoveHandler = (e) => {
+        if (Date.now() - dragStartTime > 100) {
+          isDragging = true;
         }
       };
+
+      const clickHandler = (e) => {
+        // Small delay to allow drag detection
+        setTimeout(() => {
+          if (!isDragging) {
+            if (e.ctrlKey || e.metaKey) {
+              this.toggleSlotSelection(index);
+            } else {
+              this.selectSlot(index);
+              // Show item details on click
+              this.showItemDetails(index);
+            }
+          }
+        }, 50);
+      };
+
+      slot.addEventListener("mousedown", mouseDownHandler);
+      slot.addEventListener("mousemove", mouseMoveHandler);
       slot.addEventListener("click", clickHandler);
-      this.eventListeners.set(slot, { event: "click", handler: clickHandler });
 
       // Context menu
-      const contextHandler = (e) => {
-        e.preventDefault();
-        this.showContextMenu(e, index);
-      };
-      slot.addEventListener("contextmenu", contextHandler);
-      this.eventListeners.set(slot, {
-        event: "contextmenu",
-        handler: contextHandler,
-      });
+      if (this.options.enableContextMenu) {
+        const contextHandler = (e) => {
+          e.preventDefault();
+          this.showContextMenu(e, index);
+        };
+        slot.addEventListener("contextmenu", contextHandler);
+      }
 
       // Drag and drop
-      this.setupDragDrop(slot, index);
+      if (this.options.enableDragDrop) {
+        this.setupDragDrop(slot, index);
+      }
 
       // Keyboard navigation
-      const keyHandler = (e) => this.handleKeyboard(e, index);
-      slot.addEventListener("keydown", keyHandler);
-      this.eventListeners.set(slot, { event: "keydown", handler: keyHandler });
+      if (this.options.enableKeyboardShortcuts) {
+        const keyHandler = (e) => this.handleKeyboard(e, index);
+        slot.addEventListener("keydown", keyHandler);
+      }
     });
   }
 
@@ -959,7 +1075,11 @@ class InventoryManager {
    * Set up drag and drop for a slot
    */
   setupDragDrop(slot, index) {
-    if (!this.options.enableDragDrop) return;
+    // Make slot draggable if it has an item
+    const updateDraggable = () => {
+      slot.draggable = this.slots[index] !== null;
+    };
+    updateDraggable();
 
     // Drag start
     const dragStartHandler = (e) => {
@@ -973,10 +1093,6 @@ class InventoryManager {
       }
     };
     slot.addEventListener("dragstart", dragStartHandler);
-    this.eventListeners.set(slot, {
-      event: "dragstart",
-      handler: dragStartHandler,
-    });
 
     // Drag over
     const dragOverHandler = (e) => {
@@ -984,20 +1100,12 @@ class InventoryManager {
       slot.classList.add("drag-over");
     };
     slot.addEventListener("dragover", dragOverHandler);
-    this.eventListeners.set(slot, {
-      event: "dragover",
-      handler: dragOverHandler,
-    });
 
     // Drag leave
     const dragLeaveHandler = () => {
       slot.classList.remove("drag-over");
     };
     slot.addEventListener("dragleave", dragLeaveHandler);
-    this.eventListeners.set(slot, {
-      event: "dragleave",
-      handler: dragLeaveHandler,
-    });
 
     // Drop
     const dropHandler = (e) => {
@@ -1012,32 +1120,15 @@ class InventoryManager {
         }
       }
 
-      // Clean up drag state
       this.cleanupDragState();
     };
     slot.addEventListener("drop", dropHandler);
-    this.eventListeners.set(slot, { event: "drop", handler: dropHandler });
 
     // Drag end
     const dragEndHandler = () => {
       this.cleanupDragState();
     };
     slot.addEventListener("dragend", dragEndHandler);
-    this.eventListeners.set(slot, {
-      event: "dragend",
-      handler: dragEndHandler,
-    });
-
-    // Make slot draggable if it has an item
-    this.updateSlotDraggable(slot, index);
-  }
-
-  /**
-   * Update slot draggable state
-   */
-  updateSlotDraggable(slot, index) {
-    const hasItem = this.slots[index] !== null;
-    slot.draggable = hasItem;
   }
 
   /**
@@ -1055,8 +1146,6 @@ class InventoryManager {
    * Set up keyboard shortcuts
    */
   setupKeyboardShortcuts() {
-    if (!this.options.enableKeyboardShortcuts) return;
-
     const keyboardHandler = (e) => {
       // Only handle shortcuts when inventory is visible
       if (!this.isVisible) return;
@@ -1094,39 +1183,44 @@ class InventoryManager {
     };
 
     document.addEventListener("keydown", keyboardHandler);
-    this.eventListeners.set(document, {
+    this.eventListeners.set("document-keyboard", {
       event: "keydown",
       handler: keyboardHandler,
     });
-
-    this.log("Keyboard shortcuts set up");
   }
 
   /**
-   * Refresh the inventory UI
+   * Refresh the inventory UI - FIXED VERSION
    */
   refreshUI() {
     try {
-      if (!this.containerElement) {
-        this.log("No container element found for UI refresh", "warn");
+      if (!this.isInitialized || !this.containerElement) {
+        this.log("Cannot refresh UI - system not ready", "warn");
         return;
       }
 
       this.updateSlots();
       this.updateStats();
-      this.updateVisibility();
 
       this.log("UI refreshed successfully");
     } catch (error) {
       this.log(`Error refreshing UI: ${error.message}`, "error");
+      console.error("Full refresh UI error:", error);
     }
   }
 
   /**
-   * Update individual slot displays
+   * Update individual slot displays - FIXED VERSION
    */
   updateSlots() {
     const slots = document.querySelectorAll(".inventory-slot");
+
+    if (slots.length === 0) {
+      this.log("No slot elements found during updateSlots", "error");
+      return;
+    }
+
+    this.log(`Updating ${slots.length} slots`);
 
     slots.forEach((slot, index) => {
       const item = this.slots[index];
@@ -1134,8 +1228,7 @@ class InventoryManager {
       if (item) {
         slot.innerHTML = this.generateItemHTML(item);
         slot.title = this.generateTooltip(item);
-        slot.classList.remove("hidden");
-        this.updateSlotDraggable(slot, index);
+        slot.draggable = true;
         this.log(`Updated slot ${index} with item: ${item.name}`);
       } else {
         slot.innerHTML = "";
@@ -1144,7 +1237,6 @@ class InventoryManager {
       }
 
       // Apply visibility based on current filter
-      // If no filter is active (visibleSlots is empty), show all slots
       const shouldShow =
         this.visibleSlots.size === 0 || this.visibleSlots.has(index);
 
@@ -1152,12 +1244,11 @@ class InventoryManager {
         slot.style.display = "flex";
         slot.classList.remove("hidden");
       } else {
-        slot.style.display = "none";
+        // Don't completely hide, just make less visible
+        slot.style.display = "flex";
         slot.classList.add("hidden");
       }
     });
-
-    this.log(`Updated ${slots.length} slots`);
   }
 
   /**
@@ -1171,7 +1262,16 @@ class InventoryManager {
       <div class="inventory-item rarity-${
         item.rarity
       }" style="border-color: ${rarityColor};">
-        <div class="inventory-item-icon">
+        <div class="inventory-item-icon" style="
+          background: linear-gradient(45deg, ${rarityColor}33, transparent);
+          width: 100%; 
+          height: 100%; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          font-size: 28px;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        ">
           ${itemEmoji}
         </div>
         ${
@@ -1211,13 +1311,6 @@ class InventoryManager {
   }
 
   /**
-   * Update slot visibility based on filters
-   */
-  updateVisibility() {
-    this.updateVisibleSlots();
-  }
-
-  /**
    * Show the inventory
    */
   show() {
@@ -1226,6 +1319,7 @@ class InventoryManager {
       this.isVisible = true;
       this.refreshUI();
       this.dispatchEvent("inventory:shown");
+      this.log("Inventory shown");
     }
   }
 
@@ -1237,6 +1331,7 @@ class InventoryManager {
       this.containerElement.classList.remove("visible");
       this.isVisible = false;
       this.dispatchEvent("inventory:hidden");
+      this.log("Inventory hidden");
     }
   }
 
@@ -1255,12 +1350,10 @@ class InventoryManager {
    * Select a slot
    */
   selectSlot(index) {
-    // Clear previous selections
     document.querySelectorAll(".inventory-slot").forEach((slot) => {
       slot.classList.remove("selected");
     });
 
-    // Select new slot
     const slot = document.querySelector(`[data-slot="${index}"]`);
     if (slot) {
       slot.classList.add("selected");
@@ -1288,8 +1381,6 @@ class InventoryManager {
    * Show context menu for a slot
    */
   showContextMenu(e, slotIndex) {
-    if (!this.options.enableContextMenu) return;
-
     const item = this.slots[slotIndex];
     if (!item) return;
 
@@ -1375,8 +1466,6 @@ class InventoryManager {
    * Handle keyboard navigation
    */
   handleKeyboard(e, slotIndex) {
-    if (!this.options.enableKeyboardShortcuts) return;
-
     switch (e.key) {
       case "Enter":
       case " ":
@@ -1420,6 +1509,313 @@ class InventoryManager {
   }
 
   /**
+   * Show detailed information about an item
+   * @param {number} slotIndex - Slot containing the item
+   */
+  showItemDetails(slotIndex) {
+    const item = this.slots[slotIndex];
+    const detailsContent = document.getElementById("inventory-details-content");
+
+    if (!detailsContent) {
+      this.log("Details panel not found", "warn");
+      return;
+    }
+
+    if (!item) {
+      // Show empty state
+      detailsContent.innerHTML = `
+        <div class="inventory-details-empty">
+          <div class="inventory-details-empty-icon">👆</div>
+          <div class="inventory-details-empty-text">Click an item to view details</div>
+        </div>
+      `;
+      return;
+    }
+
+    // Get comprehensive item data
+    const tooltipData = item.getTooltipData();
+    const effectiveStats = item.getEffectiveStats();
+
+    // Generate detailed HTML
+    detailsContent.innerHTML = `
+      <div class="inventory-details-item">
+        <!-- Item Header -->
+        <div class="inventory-details-item-header">
+          <div class="inventory-details-item-icon" style="background: linear-gradient(45deg, ${item.getRarityColor()}33, transparent);">
+            ${this.getItemEmoji(item.type)}
+          </div>
+          <div class="inventory-details-item-info">
+            <h4 class="inventory-details-item-name" style="color: ${item.getRarityColor()};">
+              ${item.name}
+            </h4>
+            <div class="inventory-details-item-type">
+              ${item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+              ${item.category ? `• ${item.category}` : ""}
+            </div>
+            <div class="inventory-details-item-rarity rarity-${item.rarity}">
+              ${item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}
+            </div>
+          </div>
+        </div>
+
+        <!-- Item Description -->
+        ${
+          item.description
+            ? `
+          <div class="inventory-details-section">
+            <div class="inventory-details-section-title">Description</div>
+            <div class="inventory-details-item-description">
+              ${item.description}
+            </div>
+          </div>
+        `
+            : ""
+        }
+
+        <!-- Item Stats -->
+        ${
+          Object.keys(effectiveStats).length > 0
+            ? `
+          <div class="inventory-details-section">
+            <div class="inventory-details-section-title">Stats</div>
+            <div class="inventory-details-stats">
+              ${Object.entries(effectiveStats)
+                .map(
+                  ([stat, value]) => `
+                <div class="inventory-details-stat">
+                  <span class="inventory-details-stat-name">${
+                    stat.charAt(0).toUpperCase() + stat.slice(1)
+                  }:</span>
+                  <span class="inventory-details-stat-value ${
+                    value > 0 ? "positive" : value < 0 ? "negative" : "neutral"
+                  }">
+                    ${value > 0 ? "+" : ""}${value}
+                  </span>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+            : ""
+        }
+
+        <!-- Item Effects -->
+        ${
+          item.effects && item.effects.length > 0
+            ? `
+          <div class="inventory-details-section">
+            <div class="inventory-details-section-title">Effects</div>
+            <div class="inventory-details-effects">
+              ${item.effects
+                .map(
+                  (effect) => `
+                <div class="inventory-details-effect">
+                  <div class="inventory-details-effect-type">${effect.type
+                    .replace("_", " ")
+                    .toUpperCase()}</div>
+                  ${
+                    effect.amount
+                      ? `<div class="inventory-details-effect-amount">${effect.amount}</div>`
+                      : ""
+                  }
+                  ${
+                    effect.duration
+                      ? `<div class="inventory-details-effect-duration">${Math.round(
+                          effect.duration / 1000
+                        )}s</div>`
+                      : ""
+                  }
+                  ${
+                    effect.description
+                      ? `<div class="inventory-details-effect-description">${effect.description}</div>`
+                      : ""
+                  }
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+            : ""
+        }
+
+        <!-- Requirements -->
+        ${
+          item.requirements && Object.keys(item.requirements).length > 0
+            ? `
+          <div class="inventory-details-section">
+            <div class="inventory-details-section-title">Requirements</div>
+            <div class="inventory-details-requirements">
+              ${Object.entries(item.requirements)
+                .map(
+                  ([req, value]) => `
+                <div class="inventory-details-requirement">
+                  <span class="inventory-details-requirement-name">${
+                    req.charAt(0).toUpperCase() + req.slice(1)
+                  }:</span>
+                  <span class="inventory-details-requirement-value">${value}</span>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        `
+            : ""
+        }
+
+        <!-- Durability -->
+        ${
+          item.durability !== null && item.maxDurability !== null
+            ? `
+          <div class="inventory-details-section">
+            <div class="inventory-details-section-title">Condition</div>
+            <div class="inventory-details-durability">
+              <div class="inventory-details-durability-text">
+                ${item.getConditionText()} (${item.durability}/${
+                item.maxDurability
+              })
+              </div>
+              <div class="inventory-details-durability-bar-container">
+                <div class="inventory-details-durability-bar" style="width: ${Math.round(
+                  (item.durability / item.maxDurability) * 100
+                )}%"></div>
+              </div>
+            </div>
+          </div>
+        `
+            : ""
+        }
+
+        <!-- Item Properties -->
+        <div class="inventory-details-section">
+          <div class="inventory-details-section-title">Properties</div>
+          <div class="inventory-details-properties">
+            <div class="inventory-details-property">
+              <span class="inventory-details-property-name">Value:</span>
+              <span class="inventory-details-property-value">${
+                item.value
+              } gold</span>
+            </div>
+            ${
+              item.sellValue !== item.value
+                ? `
+              <div class="inventory-details-property">
+                <span class="inventory-details-property-name">Sell Value:</span>
+                <span class="inventory-details-property-value">${item.sellValue} gold</span>
+              </div>
+            `
+                : ""
+            }
+            <div class="inventory-details-property">
+              <span class="inventory-details-property-name">Quality:</span>
+              <span class="inventory-details-property-value">${
+                item.quality
+              }%</span>
+            </div>
+            ${
+              item.stackable
+                ? `
+              <div class="inventory-details-property">
+                <span class="inventory-details-property-name">Quantity:</span>
+                <span class="inventory-details-property-value">${item.quantity}/${item.maxStackSize}</span>
+              </div>
+            `
+                : ""
+            }
+            <div class="inventory-details-property">
+              <span class="inventory-details-property-name">Tradeable:</span>
+              <span class="inventory-details-property-value">${
+                item.tradeable ? "Yes" : "No"
+              }</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item Status -->
+        <div class="inventory-details-section">
+          <div class="inventory-details-section-title">Status</div>
+          <div class="inventory-details-status">
+            ${
+              item.equipped
+                ? '<div class="inventory-details-status-item equipped">✓ Equipped</div>'
+                : ""
+            }
+            ${
+              item.locked
+                ? '<div class="inventory-details-status-item locked">🔒 Locked</div>'
+                : ""
+            }
+            ${
+              item.favorite
+                ? '<div class="inventory-details-status-item favorite">⭐ Favorite</div>'
+                : ""
+            }
+          </div>
+        </div>
+
+        <!-- Usage Statistics -->
+        <div class="inventory-details-section">
+          <div class="inventory-details-section-title">Statistics</div>
+          <div class="inventory-details-usage">
+            <div class="inventory-details-usage-item">
+              <span class="inventory-details-usage-name">Times Used:</span>
+              <span class="inventory-details-usage-value">${
+                item.timesUsed
+              }</span>
+            </div>
+            <div class="inventory-details-usage-item">
+              <span class="inventory-details-usage-name">Last Used:</span>
+              <span class="inventory-details-usage-value">${
+                tooltipData.lastUsed
+              }</span>
+            </div>
+            <div class="inventory-details-usage-item">
+              <span class="inventory-details-usage-name">Created:</span>
+              <span class="inventory-details-usage-value">${new Date(
+                item.createdAt
+              ).toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Item Actions -->
+        <div class="inventory-details-actions">
+          ${
+            item.type === "consumable"
+              ? `
+            <button class="inventory-details-action-btn primary" onclick="window.currentInventory?.useItem(${slotIndex})">
+              Use Item
+            </button>
+          `
+              : item.type === "weapon" || item.type === "armor"
+              ? `
+            <button class="inventory-details-action-btn primary" onclick="window.currentInventory?.useItem(${slotIndex})">
+              ${item.equipped ? "Unequip" : "Equip"}
+            </button>
+          `
+              : ""
+          }
+          <button class="inventory-details-action-btn secondary" onclick="window.currentInventory?.toggleItemFavorite(${slotIndex})">
+            ${item.favorite ? "Unfavorite" : "Favorite"}
+          </button>
+          <button class="inventory-details-action-btn danger" onclick="window.currentInventory?.removeItem(${slotIndex})">
+            Drop Item
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Store reference for action buttons
+    window.currentInventory = this;
+
+    this.log(`Showing details for item: ${item.name}`);
+  }
+
+  /**
    * Generate tooltip text for an item
    */
   generateTooltip(item) {
@@ -1430,7 +1826,7 @@ class InventoryManager {
       tooltipData.durability !== null
         ? `\nDurability: ${tooltipData.durability}/${tooltipData.maxDurability}`
         : ""
-    }`;
+    }\n\nClick for details`;
   }
 
   /**
@@ -1550,6 +1946,80 @@ class InventoryManager {
   }
 
   /**
+   * Export inventory data for external use
+   * @param {boolean} includeMetadata - Include metadata in export
+   * @returns {Object} - Exported inventory data
+   */
+  exportInventory(includeMetadata = true) {
+    const exportData = {
+      slots: this.slots.map((item) => (item ? item.toJSON() : null)),
+      timestamp: Date.now(),
+      version: "1.0.0",
+    };
+
+    if (includeMetadata) {
+      exportData.metadata = {
+        operationCount: this.operationCount,
+        lastOperation: this.lastOperation,
+        options: this.options,
+      };
+    }
+
+    return exportData;
+  }
+
+  /**
+   * Import inventory data from external source
+   * @param {Object} importData - Data to import
+   * @param {boolean} merge - Merge with current inventory instead of replacing
+   * @returns {boolean} - Success status
+   */
+  importInventory(importData, merge = false) {
+    try {
+      if (!importData.slots) {
+        this.log("Invalid import data: missing slots", "warn");
+        return false;
+      }
+
+      if (merge) {
+        // Merge items into empty slots
+        importData.slots.forEach((itemData, index) => {
+          if (itemData && !this.slots[index]) {
+            this.slots[index] = InventoryItem.fromJSON(itemData);
+          }
+        });
+      } else {
+        // Replace entire inventory
+        this.loadFromData(importData);
+      }
+
+      this.saveInventory();
+      this.refreshUI();
+      this.log("Inventory imported successfully");
+      return true;
+    } catch (error) {
+      this.log("Error importing inventory:", "error");
+      return false;
+    }
+  }
+
+  /**
+   * Get performance statistics
+   * @returns {Object} - Performance stats
+   */
+  getPerformanceStats() {
+    return {
+      operationCount: this.operationCount,
+      lastOperation: this.lastOperation,
+      slotsCount: this.slots.length,
+      itemsCount: this.slots.filter((item) => item !== null).length,
+      templatesCount: this.itemTemplates.size,
+      isVisible: this.isVisible,
+      isInitialized: this.isInitialized,
+    };
+  }
+
+  /**
    * Debug method to check inventory state
    */
   debugInventory() {
@@ -1562,6 +2032,7 @@ class InventoryManager {
     console.log("Slots array:", this.slots);
     console.log("Container element:", this.containerElement);
     console.log("Is visible:", this.isVisible);
+    console.log("Is initialized:", this.isInitialized);
     console.log("Visible slots:", this.visibleSlots);
     console.log("Current filter:", this.currentFilter);
     console.log("Search query:", this.searchQuery);
@@ -1588,6 +2059,7 @@ class InventoryManager {
       itemCount: this.slots.filter((item) => item !== null).length,
       hasContainer: !!this.containerElement,
       isVisible: this.isVisible,
+      isInitialized: this.isInitialized,
       slotElements: slots.length,
     };
   }
@@ -1599,20 +2071,29 @@ class InventoryManager {
     this.log("Destroying InventoryManager...");
 
     // Remove event listeners
-    this.eventListeners.forEach((listener, element) => {
-      element.removeEventListener(listener.event, listener.handler);
+    this.eventListeners.forEach((listener, key) => {
+      if (key === "document-keyboard") {
+        document.removeEventListener(listener.event, listener.handler);
+      } else {
+        const element = document.getElementById(key);
+        if (element && listener.handler) {
+          element.removeEventListener(listener.event, listener.handler);
+        }
+      }
     });
     this.eventListeners.clear();
 
     // Clear UI
     if (this.containerElement) {
       this.containerElement.remove();
+      this.containerElement = null;
     }
 
     // Clear data
     this.slots = [];
     this.selectedSlots.clear();
     this.itemTemplates.clear();
+    this.isInitialized = false;
 
     this.log("InventoryManager destroyed");
   }

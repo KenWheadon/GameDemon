@@ -1,4 +1,4 @@
-/* Inventory System CSS - Complete Styling for Game Inventory */
+/* Inventory System CSS - Complete Styling for Game Inventory with Item Details Panel */
 
 /* CSS Variables for theming */
 :root {
@@ -40,14 +40,14 @@
   --inventory-gap: 4px;
 }
 
-/* Main inventory container */
+/* Main inventory container - UPDATED FOR ITEM DETAILS LAYOUT */
 .inventory-container {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.9);
-  width: 90%;
-  max-width: 800px;
+  width: 95%;
+  max-width: 1200px; /* Increased for details panel */
   max-height: 85vh;
   background: var(--inventory-background-primary);
   border: 2px solid var(--inventory-border-color);
@@ -55,11 +55,12 @@
   box-shadow: 0 15px 35px var(--inventory-shadow-color);
   backdrop-filter: blur(15px);
   color: var(--inventory-text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   z-index: var(--inventory-z-index-base);
   opacity: 0;
   pointer-events: none;
-  transition: all var(--inventory-transition-speed) cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all var(--inventory-transition-speed)
+    cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
   user-select: none;
 }
@@ -68,6 +69,382 @@
   opacity: 1;
   pointer-events: auto;
   transform: translate(-50%, -50%) scale(1);
+}
+
+/* Layout container for side-by-side panels */
+.inventory-layout {
+  display: flex;
+  height: 100%;
+  min-height: 500px;
+}
+
+/* Item Details Panel (Left Side) */
+.inventory-details-panel {
+  width: 320px;
+  background: var(--inventory-background-secondary);
+  border-right: 1px solid var(--inventory-border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inventory-details-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--inventory-border-color);
+  background: var(--inventory-background-accent);
+}
+
+.inventory-details-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--inventory-text-accent);
+  margin: 0;
+}
+
+.inventory-details-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* Empty state for details panel */
+.inventory-details-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--inventory-text-muted);
+}
+
+.inventory-details-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.inventory-details-empty-text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Item details styling */
+.inventory-details-item {
+  padding: 0;
+}
+
+.inventory-details-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: var(--inventory-background-accent);
+  border-bottom: 1px solid var(--inventory-border-color);
+}
+
+.inventory-details-item-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  border-radius: var(--inventory-border-radius);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.inventory-details-item-info {
+  flex: 1;
+}
+
+.inventory-details-item-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.inventory-details-item-type {
+  font-size: 12px;
+  color: var(--inventory-text-secondary);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.inventory-details-item-rarity {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.inventory-details-item-rarity.rarity-common {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.inventory-details-item-rarity.rarity-uncommon {
+  background: rgba(30, 255, 0, 0.2);
+  color: #1eff00;
+}
+
+.inventory-details-item-rarity.rarity-rare {
+  background: rgba(0, 112, 221, 0.2);
+  color: #0070dd;
+}
+
+.inventory-details-item-rarity.rarity-epic {
+  background: rgba(163, 53, 238, 0.2);
+  color: #a335ee;
+}
+
+.inventory-details-item-rarity.rarity-legendary {
+  background: rgba(255, 128, 0, 0.2);
+  color: #ff8000;
+}
+
+.inventory-details-item-rarity.rarity-artifact {
+  background: rgba(230, 204, 128, 0.2);
+  color: #e6cc80;
+}
+
+/* Details sections */
+.inventory-details-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.inventory-details-section:last-child {
+  border-bottom: none;
+}
+
+.inventory-details-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--inventory-text-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.inventory-details-item-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--inventory-text-secondary);
+  font-style: italic;
+}
+
+/* Stats display */
+.inventory-details-stats {
+  display: grid;
+  gap: 8px;
+}
+
+.inventory-details-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.inventory-details-stat-name {
+  color: var(--inventory-text-secondary);
+}
+
+.inventory-details-stat-value {
+  font-weight: 600;
+}
+
+.inventory-details-stat-value.positive {
+  color: var(--inventory-success-color);
+}
+
+.inventory-details-stat-value.negative {
+  color: var(--inventory-danger-color);
+}
+
+.inventory-details-stat-value.neutral {
+  color: var(--inventory-text-primary);
+}
+
+/* Effects display */
+.inventory-details-effects {
+  display: grid;
+  gap: 8px;
+}
+
+.inventory-details-effect {
+  background: var(--inventory-background-accent);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border-left: 3px solid var(--inventory-primary-color);
+}
+
+.inventory-details-effect-type {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--inventory-primary-color);
+  margin-bottom: 2px;
+}
+
+.inventory-details-effect-amount,
+.inventory-details-effect-duration {
+  font-size: 12px;
+  color: var(--inventory-text-primary);
+  font-weight: 500;
+}
+
+.inventory-details-effect-description {
+  font-size: 11px;
+  color: var(--inventory-text-muted);
+  margin-top: 4px;
+}
+
+/* Requirements and Properties */
+.inventory-details-requirements,
+.inventory-details-properties,
+.inventory-details-usage {
+  display: grid;
+  gap: 6px;
+}
+
+.inventory-details-requirement,
+.inventory-details-property,
+.inventory-details-usage-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.inventory-details-requirement-name,
+.inventory-details-property-name,
+.inventory-details-usage-name {
+  color: var(--inventory-text-secondary);
+}
+
+.inventory-details-requirement-value,
+.inventory-details-property-value,
+.inventory-details-usage-value {
+  color: var(--inventory-text-primary);
+  font-weight: 500;
+}
+
+/* Durability bar */
+.inventory-details-durability-text {
+  font-size: 13px;
+  color: var(--inventory-text-primary);
+  margin-bottom: 8px;
+}
+
+.inventory-details-durability-bar-container {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.inventory-details-durability-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #27ae60 100%);
+  transition: width var(--inventory-transition-speed) ease;
+}
+
+/* Status indicators */
+.inventory-details-status {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inventory-details-status-item {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.inventory-details-status-item.equipped {
+  background: rgba(39, 174, 96, 0.2);
+  color: var(--inventory-success-color);
+}
+
+.inventory-details-status-item.locked {
+  background: rgba(241, 196, 15, 0.2);
+  color: var(--inventory-warning-color);
+}
+
+.inventory-details-status-item.favorite {
+  background: rgba(255, 128, 0, 0.2);
+  color: var(--inventory-rarity-legendary);
+}
+
+/* Action buttons */
+.inventory-details-actions {
+  padding: 16px 20px;
+  background: var(--inventory-background-accent);
+  border-top: 1px solid var(--inventory-border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inventory-details-action-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--inventory-transition-speed) ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.inventory-details-action-btn.primary {
+  background: var(--inventory-primary-color);
+  color: white;
+}
+
+.inventory-details-action-btn.primary:hover {
+  background: var(--inventory-secondary-color);
+  transform: translateY(-1px);
+}
+
+.inventory-details-action-btn.secondary {
+  background: var(--inventory-background-slot);
+  color: var(--inventory-text-primary);
+  border: 1px solid var(--inventory-border-color);
+}
+
+.inventory-details-action-btn.secondary:hover {
+  background: var(--inventory-background-slot-hover);
+  border-color: var(--inventory-border-color);
+}
+
+.inventory-details-action-btn.danger {
+  background: rgba(231, 76, 60, 0.2);
+  color: var(--inventory-danger-color);
+  border: 1px solid var(--inventory-danger-color);
+}
+
+.inventory-details-action-btn.danger:hover {
+  background: var(--inventory-danger-color);
+  color: white;
+}
+
+/* Main Panel (Right Side) */
+.inventory-main-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Inventory header */
@@ -643,7 +1020,7 @@
 
 /* Selection overlay for bulk operations */
 .inventory-slot::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -697,44 +1074,90 @@
 
 /* Animations */
 @keyframes legendary-glow {
-  0% { box-shadow: inset 0 0 10px rgba(255, 128, 0, 0.2), 0 0 5px rgba(255, 128, 0, 0.3); }
-  100% { box-shadow: inset 0 0 20px rgba(255, 128, 0, 0.4), 0 0 10px rgba(255, 128, 0, 0.6); }
+  0% {
+    box-shadow: inset 0 0 10px rgba(255, 128, 0, 0.2),
+      0 0 5px rgba(255, 128, 0, 0.3);
+  }
+  100% {
+    box-shadow: inset 0 0 20px rgba(255, 128, 0, 0.4),
+      0 0 10px rgba(255, 128, 0, 0.6);
+  }
 }
 
 @keyframes artifact-glow {
-  0% { box-shadow: inset 0 0 10px rgba(230, 204, 128, 0.2), 0 0 5px rgba(230, 204, 128, 0.3); }
-  100% { box-shadow: inset 0 0 20px rgba(230, 204, 128, 0.4), 0 0 15px rgba(230, 204, 128, 0.5); }
+  0% {
+    box-shadow: inset 0 0 10px rgba(230, 204, 128, 0.2),
+      0 0 5px rgba(230, 204, 128, 0.3);
+  }
+  100% {
+    box-shadow: inset 0 0 20px rgba(230, 204, 128, 0.4),
+      0 0 15px rgba(230, 204, 128, 0.5);
+  }
 }
 
 @keyframes item-added {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes item-removed {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1) rotate(5deg); }
-  100% { transform: scale(0.8) rotate(-5deg); opacity: 0.5; }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    transform: scale(0.8) rotate(-5deg);
+    opacity: 0.5;
+  }
 }
 
 @keyframes item-used {
-  0% { transform: scale(1); }
-  25% { transform: scale(0.9); }
-  50% { transform: scale(1.1); filter: brightness(1.5); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.1);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes item-moved {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Animation classes */
@@ -785,7 +1208,7 @@
   background: var(--inventory-success-color);
 }
 
-/* Mobile optimizations */
+/* Mobile optimizations - UPDATED FOR DETAILS PANEL */
 @media (max-width: 768px) {
   :root {
     --inventory-slot-size: 56px;
@@ -793,8 +1216,24 @@
   }
 
   .inventory-container {
-    width: 95%;
-    max-height: 90vh;
+    width: 98%;
+    max-height: 95vh;
+  }
+
+  .inventory-layout {
+    flex-direction: column;
+  }
+
+  .inventory-details-panel {
+    width: 100%;
+    height: 200px;
+    border-right: none;
+    border-bottom: 1px solid var(--inventory-border-color);
+    order: 2; /* Show below main panel on mobile */
+  }
+
+  .inventory-main-panel {
+    order: 1; /* Show above details panel on mobile */
   }
 
   .inventory-header {
@@ -838,6 +1277,22 @@
     min-width: 120px;
   }
 
+  /* Details panel mobile adjustments */
+  .inventory-details-content {
+    padding: 0;
+  }
+
+  .inventory-details-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .inventory-details-action-btn {
+    flex: 1;
+    min-width: 80px;
+  }
+
   /* Touch-friendly hover states */
   .inventory-slot:hover {
     transform: none;
@@ -852,8 +1307,33 @@
   }
 
   .inventory-container {
-    width: 98%;
-    max-height: 95vh;
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    top: 0;
+    left: 0;
+    transform: none;
+  }
+
+  .inventory-container.visible {
+    transform: none;
+  }
+
+  .inventory-details-panel {
+    height: 150px;
+  }
+
+  .inventory-details-item-header {
+    padding: 12px;
+  }
+
+  .inventory-details-section {
+    padding: 12px;
+  }
+
+  .inventory-details-actions {
+    padding: 12px;
   }
 
   .inventory-grid {
@@ -954,8 +1434,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error states */
