@@ -42,10 +42,23 @@ class SlotMachineApp {
     }
 
     container.innerHTML = `
+                <h1 class="slot-title">🎰 MEGA SLOTS 🎰</h1>
       <div class="game-layout">
-        <div class="slot-machine-container">
+
+        <div class="upgrades-panel slots-panel" id="upgrades-panel">
+          <h3>🔧 UPGRADES 🔧</h3>
+          <div class="upgrade-tabs">
+            <button class="upgrade-tab" data-tab="symbols">Symbols</button>
+            <button class="upgrade-tab" data-tab="luck">Luck</button>
+            <button class="upgrade-tab" data-tab="multiplier">Multiplier</button>
+          </div>
+          <div class="upgrade-content" id="upgrade-content">
+            <!-- Upgrade content will be populated by JavaScript -->
+          </div>
+        </div>
+
+        <div class="slot-machine-container slots-panel">
           <div class="slot-header">
-            <h1 class="slot-title">🎰 MEGA SLOTS 🎰</h1>
             <div class="credits-display">
               Credits: <span id="credits-value">500</span>
             </div>
@@ -92,20 +105,7 @@ class SlotMachineApp {
             <div class="secondary-controls">
               <button class="secondary-button" id="auto-spin-btn">Auto Spin</button>
               <button class="secondary-button" id="max-bet-btn">Max Bet</button>
-              <button class="secondary-button" id="upgrades-btn">Upgrades</button>
               <button class="secondary-button" id="stats-btn">Stats</button>
-            </div>
-          </div>
-
-          <div class="upgrades-panel" id="upgrades-panel" style="display: none">
-            <h3>🔧 UPGRADES 🔧</h3>
-            <div class="upgrade-tabs">
-              <button class="upgrade-tab active" data-tab="symbols">Symbols</button>
-              <button class="upgrade-tab" data-tab="luck">Luck</button>
-              <button class="upgrade-tab" data-tab="multiplier">Multiplier</button>
-            </div>
-            <div class="upgrade-content" id="upgrade-content">
-              <!-- Upgrade content will be populated by JavaScript -->
             </div>
           </div>
 
@@ -139,7 +139,7 @@ class SlotMachineApp {
           </div>
         </div>
 
-        <div class="paytable-container">
+        <div class="paytable-container slots-panel">
           <div class="paytable-header">
             <h3 class="paytable-title">💰 PAYTABLE 💰</h3>
             <div class="paytable-multiplier">Bet x<span id="bet-multiplier">1</span></div>

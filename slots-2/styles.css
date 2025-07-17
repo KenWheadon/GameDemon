@@ -46,17 +46,17 @@
   --shadow-glow-intense: 0 0 40px rgba(72, 219, 251, 0.6);
 
   /* Spacing Scale */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
+  --space-1: 0.1rem;
+  --space-2: 0.2rem;
+  --space-3: 0.35rem;
+  --space-4: 0.5rem;
+  --space-5: 0.75rem;
+  --space-6: 1rem;
+  --space-8: 1.25rem;
+  --space-10: 1.5rem;
+  --space-12: 2rem;
+  --space-16: 3rem;
+  --space-20: 4rem;
 
   /* Animation Timing */
   --timing-fast: 0.15s;
@@ -70,6 +70,10 @@
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* borders */
+  --slight-round-border: 4px;
+  --very-round-border: 16px;
 }
 
 * {
@@ -94,8 +98,7 @@ body {
 
 /* Game Layout Container */
 .game-layout {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
   gap: var(--space-8);
   max-width: 1200px;
   width: 100%;
@@ -142,15 +145,6 @@ body::before {
 }
 
 .slot-machine-container {
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  padding: var(--space-8);
-  box-shadow: var(--shadow-xl);
-  max-width: 520px;
-  width: 100%;
-  position: relative;
   overflow: hidden;
   transition: all var(--timing-normal) var(--ease-out);
 }
@@ -191,7 +185,6 @@ body::before {
 
 .slot-header {
   text-align: center;
-  margin-bottom: var(--space-8);
   position: relative;
   z-index: 2;
 }
@@ -228,7 +221,7 @@ body::before {
   padding: var(--space-3) var(--space-6);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
+  border-radius: var(--slight-round-border);
   display: inline-block;
   margin-bottom: var(--space-6);
   box-shadow: var(--shadow-md);
@@ -268,7 +261,7 @@ body::before {
   margin-bottom: var(--space-6);
   padding: var(--space-4);
   background: var(--jackpot-gradient);
-  border-radius: 20px;
+  border-radius: var(--slight-round-border);
   border: 2px solid var(--text-jackpot);
   animation: jackpotPulse 3s ease-in-out infinite;
   position: relative;
@@ -330,7 +323,7 @@ body::before {
 .luck-meter-container {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
+  border-radius: var(--slight-round-border);
   padding: var(--space-4);
   margin-bottom: var(--space-6);
   backdrop-filter: blur(20px);
@@ -419,7 +412,7 @@ body::before {
   position: relative;
   height: 16px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: var(--slight-round-border);
   overflow: hidden;
   margin-bottom: var(--space-3);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -437,7 +430,7 @@ body::before {
     #ff5722 90%,
     #ffd700 100%
   );
-  border-radius: 8px;
+  border-radius: var(--slight-round-border);
   transition: width var(--timing-slower) var(--ease-out);
   position: relative;
   overflow: hidden;
@@ -482,7 +475,7 @@ body::before {
     rgba(255, 152, 0, 0.5) 75%,
     rgba(255, 215, 0, 0.6) 100%
   );
-  border-radius: 10px;
+  border-radius: var(--slight-round-border);
   opacity: 0;
   transition: opacity var(--timing-normal) var(--ease-out);
   filter: blur(4px);
@@ -549,10 +542,10 @@ body::before {
   display: flex;
   justify-content: center;
   gap: var(--space-6);
-  margin: var(--space-8) 0;
-  padding: var(--space-6);
+  margin: var(--space-1);
+  padding: var(--space-3);
   background: var(--glass-bg);
-  border-radius: 20px;
+  border-radius: var(--very-round-border);
   border: 1px solid var(--glass-border);
   position: relative;
   overflow: hidden;
@@ -580,7 +573,7 @@ body::before {
   height: 110px;
   background: var(--glass-bg);
   border: 2px solid var(--glass-border);
-  border-radius: 20px;
+  border-radius: var(--very-round-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -733,7 +726,7 @@ body::before {
   margin: var(--space-6) 0;
   padding: var(--space-4);
   background: var(--glass-bg);
-  border-radius: 16px;
+  border-radius: var(--slight-round-border);
   border: 1px solid var(--glass-border);
   position: relative;
   overflow: hidden;
@@ -811,7 +804,7 @@ body::before {
   border: none;
   color: var(--text-primary);
   padding: var(--space-5) var(--space-10);
-  border-radius: 20px;
+  border-radius: var(--very-round-border);
   font-size: var(--text-xl);
   font-weight: 700;
   cursor: pointer;
@@ -848,7 +841,7 @@ body::before {
   width: 0;
   height: 0;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  border-radius: var(--slight-round-border);
   transform: translate(-50%, -50%);
   transition: all var(--timing-normal) var(--ease-out);
 }
@@ -896,7 +889,7 @@ body::before {
   border: 2px solid var(--glass-border);
   color: var(--text-primary);
   padding: var(--space-3) var(--space-5);
-  border-radius: 12px;
+  border-radius: var(--slight-round-border);
   font-size: var(--text-base);
   font-weight: 500;
   cursor: pointer;
@@ -945,16 +938,15 @@ body::before {
 }
 
 /* Enhanced Stats Panel */
-.stats-panel,
-.upgrades-panel {
+.slots-panel {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
+  border-radius: var(--slight-round-border);
   padding: var(--space-6);
-  margin-top: var(--space-6);
   backdrop-filter: blur(20px);
   box-shadow: var(--shadow-md);
   animation: statsAppear 0.5s var(--ease-out);
+  width: 32%;
 }
 
 .upgrades-panel h3 {
@@ -980,7 +972,7 @@ body::before {
   border: 2px solid var(--glass-border);
   color: var(--text-primary);
   padding: var(--space-2) var(--space-4);
-  border-radius: 10px;
+  border-radius: var(--slight-round-border);
   font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
@@ -1011,7 +1003,7 @@ body::before {
   padding: var(--space-4);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--slight-round-border);
   transition: all var(--timing-normal) var(--ease-out);
 }
 
@@ -1054,7 +1046,7 @@ body::before {
   border: 2px solid var(--text-success);
   color: var(--text-primary);
   padding: var(--space-2) var(--space-4);
-  border-radius: 8px;
+  border-radius: var(--slight-round-border);
   font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
@@ -1099,7 +1091,7 @@ body::before {
   padding: var(--space-4);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--slight-round-border);
   transition: all var(--timing-normal) var(--ease-out);
   position: relative;
   overflow: hidden;
@@ -1171,7 +1163,7 @@ body::before {
 .celebration-content {
   background: var(--jackpot-gradient);
   padding: var(--space-10);
-  border-radius: 24px;
+  border-radius: var(--slight-round-border);
   text-align: center;
   animation: celebrationEnhanced 1s var(--ease-elastic);
   border: 4px solid var(--text-jackpot);
@@ -1269,7 +1261,7 @@ body::before {
 .combo-display {
   background: var(--success-gradient);
   border: 2px solid var(--text-success);
-  border-radius: 12px;
+  border-radius: var(--slight-round-border);
   padding: var(--space-3) var(--space-5);
   margin: var(--space-3) 0;
   text-align: center;
@@ -1326,14 +1318,6 @@ body::before {
 
 /* Paytable Styles */
 .paytable-container {
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  padding: var(--space-6);
-  box-shadow: var(--shadow-xl);
-  width: 320px;
-  position: relative;
   overflow: hidden;
   transition: all var(--timing-normal) var(--ease-out);
 }
@@ -1388,7 +1372,7 @@ body::before {
   padding: var(--space-2) var(--space-4);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--slight-round-border);
   display: inline-block;
   box-shadow: var(--shadow-sm);
 }
@@ -1408,7 +1392,7 @@ body::before {
   padding: var(--space-2) var(--space-3);
   background: var(--glass-bg-active);
   border: 1px solid var(--glass-border-hover);
-  border-radius: 8px;
+  border-radius: var(--slight-round-border);
   margin-bottom: var(--space-2);
 }
 
@@ -1429,7 +1413,7 @@ body::before {
   padding: var(--space-2) var(--space-3);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: var(--slight-round-border);
   transition: all var(--timing-normal) var(--ease-out);
   position: relative;
   overflow: hidden;
@@ -1528,7 +1512,7 @@ body::before {
   text-align: center;
   background: var(--glass-bg);
   padding: var(--space-1);
-  border-radius: 6px;
+  border-radius: var(--slight-round-border);
   border: 1px solid var(--glass-border);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -1547,7 +1531,7 @@ body::before {
   font-weight: 600;
   background: var(--glass-bg);
   padding: 2px 4px;
-  border-radius: 4px;
+  border-radius: var(--slight-round-border);
   border: 1px solid var(--glass-border);
   min-width: 45px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -1607,7 +1591,7 @@ body::before {
   padding: var(--space-3);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--slight-round-border);
   line-height: 1.4;
   text-align: center;
 }
@@ -1679,12 +1663,10 @@ body::before {
 
   .slot-machine-container {
     padding: var(--space-6);
-    border-radius: 20px;
   }
 
   .paytable-container {
     padding: var(--space-4);
-    border-radius: 20px;
   }
 
   .paytable-grid {
@@ -1748,7 +1730,6 @@ body::before {
   }
 
   .spin-button {
-    padding: var(--space-4) var(--space-8);
     font-size: var(--text-lg);
     min-width: 200px;
   }

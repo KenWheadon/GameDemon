@@ -7,13 +7,13 @@
   --slot-secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   --slot-win-gradient: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
   --slot-jackpot-gradient: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
-  
+
   /* Background Colors */
   --slot-background-primary: rgba(0, 0, 0, 0.8);
   --slot-background-secondary: rgba(255, 255, 255, 0.1);
   --slot-background-accent: rgba(255, 255, 255, 0.05);
   --slot-background-reel: rgba(0, 0, 0, 0.6);
-  
+
   /* Text Colors */
   --slot-text-primary: #ffffff;
   --slot-text-secondary: #e0e0e0;
@@ -21,7 +21,7 @@
   --slot-text-win: #48dbfb;
   --slot-text-loss: #95a5a6;
   --slot-text-jackpot: #fdcb6e;
-  
+
   /* Border and Shadow */
   --slot-border-color: rgba(255, 255, 255, 0.2);
   --slot-border-active: rgba(72, 219, 251, 0.6);
@@ -29,13 +29,13 @@
   --slot-shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.25);
   --slot-shadow-heavy: 0 16px 48px rgba(0, 0, 0, 0.4);
   --slot-shadow-glow: 0 0 20px rgba(72, 219, 251, 0.4);
-  
+
   /* Animations */
   --slot-transition-fast: 0.15s ease;
   --slot-transition-normal: 0.3s ease;
   --slot-transition-slow: 0.6s ease;
   --slot-spin-duration: 0.1s;
-  
+
   /* Spacing and Sizing */
   --slot-border-radius: 12px;
   --slot-border-radius-small: 8px;
@@ -43,7 +43,7 @@
   --slot-padding-small: 8px;
   --slot-padding-medium: 16px;
   --slot-padding-large: 24px;
-  
+
   /* Z-index Stack */
   --slot-z-base: 100;
   --slot-z-overlay: 1000;
@@ -57,7 +57,7 @@
   justify-content: center;
   align-items: flex-start;
   flex-wrap: wrap;
-  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-family: "Comic Sans MS", cursive, sans-serif;
   color: var(--slot-text-primary);
   position: relative;
   z-index: var(--slot-z-base);
@@ -96,6 +96,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: center;
 }
 
 .slot-credits {
@@ -143,7 +144,7 @@
 }
 
 .slot-reel::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -177,8 +178,12 @@
 }
 
 @keyframes slotSpin {
-  0% { transform: rotateX(0deg); }
-  100% { transform: rotateX(360deg); }
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(360deg);
+  }
 }
 
 .slot-reel.spinning .slot-symbol {
@@ -187,8 +192,13 @@
 }
 
 @keyframes symbolSpin {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(0.8); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
 }
 
 /* Result Feedback */
@@ -208,14 +218,26 @@
 }
 
 @keyframes winnerPulse {
-  0%, 100% { transform: scale(1.05); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1.05);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 @keyframes loserShake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-3px); }
-  75% { transform: translateX(3px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
 }
 
 /* Result Display */
@@ -240,8 +262,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Controls */
@@ -281,7 +309,7 @@
 }
 
 .slot-btn-primary::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -378,8 +406,14 @@
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .slot-paytable h4 {
@@ -433,7 +467,7 @@
 }
 
 .paytable-row.jackpot::before {
-  content: '💎';
+  content: "💎";
   position: absolute;
   left: -5px;
   top: 50%;
@@ -443,8 +477,15 @@
 }
 
 @keyframes sparkle {
-  0%, 100% { opacity: 0.5; transform: translateY(-50%) scale(0.8); }
-  50% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translateY(-50%) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.2);
+  }
 }
 
 .paytable-row.paytable-winner {
@@ -456,8 +497,13 @@
 }
 
 @keyframes paytableWinPulse {
-  0%, 100% { transform: scale(1.02); }
-  50% { transform: scale(1.05); }
+  0%,
+  100% {
+    transform: scale(1.02);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .paytable-symbols {
@@ -586,7 +632,7 @@
 }
 
 .celebration-content::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
@@ -601,14 +647,28 @@
 }
 
 @keyframes celebrationBounce {
-  0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
-  60% { transform: scale(1.1) rotate(5deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  0% {
+    transform: scale(0.3) rotate(-10deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 @keyframes celebrationGlow {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(180deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
 }
 
 .celebration-message {
@@ -621,8 +681,12 @@
 }
 
 @keyframes celebrationText {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.05); }
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
 }
 
 .celebration-payout {
@@ -838,4 +902,3 @@
     display: none;
   }
 }
-  
